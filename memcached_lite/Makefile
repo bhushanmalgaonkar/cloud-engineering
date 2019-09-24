@@ -1,9 +1,9 @@
 CC           = g++
-CFLAGS       = -O2
+CFLAGS       = -O2 -pthread
 
 #set the following variables for custom libraries and/or other objects
 EXTOBJS      =
-LIBS         = -lm -lcurl
+LIBS         = -lm 
 LIBPATHS     = 
 INCLUDEPATHS = 
 

@@ -5,9 +5,13 @@
 #include <chrono>
 #include <iostream>
 #include <unordered_map>
+#include <pthread.h>
 
 // number of seconds in 30 days
 #define EXP_TIME_LIMIT 2592000ll
+#define CMD_QUIT "quit\r\n"
+
+const char* welcome = "Welcome to Memcached-lite\n";
 
 using namespace std;
 using namespace std::chrono;
@@ -56,7 +60,42 @@ class Memcache {
     }
 };
 
-int main(int argc, char **argv) {
+// structure that stores parameters to be passed while starting new thread
+// for new client, allows to add new parameters easily 
+struct ConnectionArgs {
+	int client_socket;
+};
+
+// indefinitely reads input from the input socket, and echoes back
+// exits when clients sent CMD_QUIT
+void* serve_client(void* args) {
+	ConnectionArgs* conn_args = (ConnectionArgs*) args;
+	int client_socket = conn_args->client_socket;
+	
+	char buffer[1024] = {0};
+    send(client_socket, welcome, strlen(welcome), 0);
+
+    while (1) {
+		// clear buffer for next input
+		memset(buffer, 0, 1024);
+
+        read(client_socket, buffer, 1024);
+        
+		// close the connection and exit the thread if client sends CMD_QUIT
+		fprintf(stdout, "client sent: %s, %ld\n", buffer, strlen(buffer));
+        if (strncmp(buffer, CMD_QUIT, strlen(buffer)) == 0) {
+			break;
+        }
+
+        send(client_socket, buffer, strlen(buffer), 0);
+    }
+
+	fprintf(stdout, "Closing socket %d\n", client_socket);
+	close(client_socket);
+	pthread_exit(0);
+}
+
+int main(int argc, char** argv) {
     if (argc < 2) {
         fprintf(stderr, "Usage: %s <port>\n", argv[0]);
         exit(1);
@@ -75,7 +114,7 @@ int main(int argc, char **argv) {
     address.sin_addr.s_addr = INADDR_ANY;
     address.sin_port = htons(PORT);
 
-    if (bind(server_socket, (struct sockaddr *)&address, sizeof(address)) < 0) {
+    if (bind(server_socket, (struct sockaddr*)&address, sizeof(address)) < 0) {
         fprintf(stderr, "Bind failed.\n");
         exit(1);
     }
@@ -85,27 +124,21 @@ int main(int argc, char **argv) {
         exit(1);
     }
 
-    int client_socket;
-    if ((client_socket = accept(server_socket, (struct sockaddr *)&address,
-                                (socklen_t *)&address_len)) < 0) {
-        fprintf(stderr, "Accept failed.\n");
-        exit(1);
-    }
+	while (1) {
+		int client_socket;
+		if ((client_socket = accept(server_socket, (struct sockaddr*)&address,
+									(socklen_t*)&address_len)) < 0) {
+			fprintf(stderr, "Accept failed.\n");
+			continue;
+		}
 
-    char buffer[1024] = {0};
-    const char *welcome = "Welcome to Memcached-lite\n";
-    send(client_socket, welcome, strlen(welcome), 0);
+		// start a new thread for each accepted connection
+		pthread_t thread_id;
+		ConnectionArgs conn_args;
+		conn_args.client_socket = client_socket;
 
-    while (1) {
-        memset(buffer, 0, 1024);
-        read(client_socket, buffer, 1024);
-        fprintf(stdout, "client sent: %s, %ld\n", buffer, strlen(buffer));
-        if (strncmp(buffer, "quit\r\n", strlen(buffer)) == 0) {
-            close(client_socket);
-            break;
-        }
-        send(client_socket, buffer, strlen(buffer), 0);
-    }
+		pthread_create(&thread_id, nullptr, serve_client, &conn_args);
+	}
 
     // cleanup
     close(server_socket);
