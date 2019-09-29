@@ -4,7 +4,8 @@
 #include <sys/socket.h>
 #include <iostream>
 
-#include "ConnectionArgs.h"
+#include "Constants.h"
+#include "ClientArgs.h"
 #include "MemcacheProtocol.h"
 
 int main(int argc, char** argv) {
@@ -36,6 +37,12 @@ int main(int argc, char** argv) {
         exit(1);
     }
 
+    MemcacheStore store;
+    if (!store.init(MEMCACHE_STORE_PATH)) {
+        std::cerr << "Error creating store.\n";
+        exit(1);
+    }
+    
     while (1) {
         int client_socket;
         if ((client_socket = accept(server_socket, (struct sockaddr*)&address,
@@ -46,11 +53,13 @@ int main(int argc, char** argv) {
 
         // start a new thread for each accepted connection
         pthread_t thread_id;
-        ConnectionArgs conn_args;
-        conn_args.client_socket = client_socket;
+
+        ClientArgs client_args;
+        client_args.client_socket = client_socket;
+        client_args.store = &store;
 
         if (pthread_create(&thread_id, nullptr, MemcacheProtocol::serve_client,
-                           &conn_args) == 0) {
+                           &client_args) == 0) {
             pthread_detach(thread_id);
         }
     }

@@ -15,6 +15,16 @@ const std::string CMD_QUIT = "quit\r\n";
 const std::string GENERIC_ERROR = "ERROR\r\n";
 
 /**
+ * Error message sent to client when more than required data is received
+ **/
+const std::string CLIENT_ERROR_BAD_DATA_CHUNK = "CLIENT_ERROR bad data chunk\r\n";
+
+/**
+ * Path for storing memcache entries on file system
+ **/
+const std::string MEMCACHE_STORE_PATH = "./store";
+
+/**
  * Buffer size used to send/receive data to/from socket
  **/
 const ssize_t BUFFER_SIZE = 1024;

@@ -3,19 +3,19 @@
 
 #include <string>
 
-#include "ConnectionArgs.h"
+#include "ClientArgs.h"
 
 class Socket {
-    ConnectionArgs conn_args;
+    int socket;
 
    public:
-    Socket(ConnectionArgs args);
+    Socket(int socket);
 
     // Read message from socket of length 'length' if provided
     // If length is provided and received message is shorter, this method
     // will wait for futher message and
     // Return whole message as one std::string object
-    std::string read_msg(ssize_t length = -1);
+    std::string read_msg(int length = -1);
 
     // Sends given data using socket.
     // For longer data, breaks the data into chunks that can fit into buffer

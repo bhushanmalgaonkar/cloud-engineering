@@ -9,7 +9,7 @@
  **/
 class MemcacheSetCommand : public MemcacheAbstractCommand {
    public:
-    MemcacheExchange execute(MemcacheExchange input) override;
+    MemcacheExchange execute(MemcacheStore store, MemcacheExchange input) override;
 };
 
 #endif

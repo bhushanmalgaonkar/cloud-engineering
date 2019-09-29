@@ -8,10 +8,12 @@
  * Also takes care of persisting data on the file system
  **/
 class MemcacheStore {
+    std::string path;
    public:
-    MemcacheStore() {}
+    bool init(std::string path);
     std::string set(std::string key, int flags, long exp_time,
-                    std::string value);
+                    int size, std::string value);
+    std::string get(std::string key);
 };
 
 #endif
