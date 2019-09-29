@@ -1,14 +1,16 @@
 #include <string>
 
-#include <experimental/filesystem>
+#include <sys/stat.h>
 #include <fstream>
 #include <iostream>
 
 #include "MemcacheStore.h"
 
 bool MemcacheStore::init(std::string path) {
-    if (!std::experimental::filesystem::exists(path)) {
-        if (!std::experimental::filesystem::create_directories(path)) {
+    struct stat sb;
+
+    if (!(stat(path.c_str(), &sb) == 0 && S_ISDIR(sb.st_mode))) {
+        if (mkdir(path.c_str(), 0777) != 0) {
             return false;
         }
     }
