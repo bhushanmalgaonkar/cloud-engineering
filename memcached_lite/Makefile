@@ -7,14 +7,14 @@ LIBS         = -lm -pthread
 LIBPATHS     = 
 INCLUDEPATHS = 
 
-PROGRAMS     = server
+PROGRAMS     = Server.cpp MemcacheExchange.h MemcacheExchange.cpp
 all: $(PROGRAMS)
 
 $(PROGRAMS): %: %.o
 	$(CC) -o $@ $< $(LIBPATHS) $(CFLAGS) $(EXTOBJS) $(LIBS)
 
-.c.o:
+.cpp.o:
 	$(CC) $(CFLAGS) $(TUNEFLAGS) $(INCLUDEPATHS) -c $<
 
 clean:
-	rm -f $(PROGRAMS) *.o *~
+	rm -f *.o 
