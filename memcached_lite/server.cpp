@@ -29,6 +29,11 @@
 #define CMD_NO_REPLY "noreply\r\n"
 
 /**
+ * Error message sent to client when invalid command is entered
+ **/
+#define GENERIC_ERROR "ERROR\r\n"
+
+/**
  * Buffer size used to send/receive data to/from socket
  **/
 ssize_t BUFFER_SIZE = 1024;
@@ -120,16 +125,31 @@ class MemcacheStore {
  **/
 struct MemcacheExchange {
     std::string command;
+    std::vector<std::string> args;
     std::string value;
+
+    std::string to_str() {
+        std::string joined;
+
+        joined.append(command);
+        for (int i = 0; i < args.size(); ++i) {
+            if (!joined.empty()) {
+                joined.append(" ");
+            }
+            joined.append(args[i]);
+        }
+        if (!joined.empty()) {
+            joined.append("\n");
+        }
+        joined.append(value);
+
+        return joined;
+    }
 };
 
 class MemcacheAbstractCommand {
-   protected:
-    MemcacheExchange data;
-
    public:
-    virtual void parse(std::string command);
-    virtual MemcacheExchange execute();
+    virtual MemcacheExchange execute(MemcacheExchange input) = 0;
 };
 
 /**
@@ -138,8 +158,10 @@ class MemcacheAbstractCommand {
  **/
 class MemcacheSetCommand : public MemcacheAbstractCommand {
    public:
-    void parse(std::string command) {}
-    MemcacheExchange execute();
+    MemcacheExchange execute(MemcacheExchange input) override {
+        MemcacheExchange output;
+        return output;
+    }
 };
 
 /**
@@ -147,11 +169,13 @@ class MemcacheSetCommand : public MemcacheAbstractCommand {
  **/
 class MemcacheGetCommand : public MemcacheAbstractCommand {
    public:
-    void parse(std::string command) {}
-    MemcacheExchange execute();
+    MemcacheExchange execute(MemcacheExchange input) override {
+        cout << "Executing get" << endl;
+        MemcacheExchange output;
+        output.value = "got it!!\r\n";
+        return output;
+    }
 };
-
-class Memcache {};
 
 /**
  * Structure that stores parameters to be passed while starting new thread
@@ -173,12 +197,12 @@ class Socket {
     // Return whole message as one std::string object
     std::string read_msg(ssize_t length = -1) {
         int client_socket = conn_args.client_socket;
-        char buffer[BUFFER_SIZE] = {0};
+        char buffer[BUFFER_SIZE + 1] = {0};
 
         std::string data;
         do {
             // clear buffer for next input
-            memset(buffer, 0, BUFFER_SIZE);
+            memset(buffer, 0, BUFFER_SIZE + 1);
 
             // read command
             ssize_t bytes = read(client_socket, buffer, BUFFER_SIZE);
@@ -192,25 +216,44 @@ class Socket {
 
     void send_msg(std::string data) {
         int client_socket = conn_args.client_socket;
-        char buffer[BUFFER_SIZE] = {0};
+        char buffer[BUFFER_SIZE + 1] = {0};
 
-        for (size_t start = 0; start < data.length(); start += BUFFER_SIZE) {
+        for (ssize_t start = 0; start < data.length(); start += BUFFER_SIZE) {
+            cout << "send_msg: data.length: " << data.length() << endl;
+            // clear buffer for next input
+            memset(buffer, 0, BUFFER_SIZE + 1);
+
+            cout << "start: " << start << ", len: " << (std::min(BUFFER_SIZE, (ssize_t)data.length() - start)) << endl;
+
             std::size_t length = data.copy(
-                buffer, start,
-                std::min(BUFFER_SIZE, (ssize_t)data.length()) - start);
+                buffer, std::min(BUFFER_SIZE, (ssize_t)data.length() - start),
+                start);
+
+            cout << "send msg: buffer: " << buffer << endl;
             send(client_socket, buffer, length, 0);
         }
     }
 
     void cleanup() {
         int client_socket = conn_args.client_socket;
-
-        cout << "Closing socket: " << client_socket << std::endl;
         close(client_socket);
     }
 };
 
 class MemcacheProtocol {
+    // parses MemcacheExchange object and return appropriate concrete
+    // object of MemcacheCommand
+    static MemcacheAbstractCommand* resolve(MemcacheExchange exchange) {
+        MemcacheAbstractCommand* command = nullptr;
+        if (std::string("set").compare(exchange.command) == 0) {
+            command = new MemcacheSetCommand();
+        } else if (std::string("get").compare(exchange.command) == 0) {
+            cout << "matched with get" << endl;
+            command = new MemcacheGetCommand();
+        }
+        return command;
+    }
+
    public:
     // Indefinitely reads input from the input socket, and calls appropriate
     // function to execute the command Exits when clients sent CMD_QUIT
@@ -222,35 +265,48 @@ class MemcacheProtocol {
         socket.send_msg(WELCOME_MESSAGE);
 
         while (1) {
-            std::string command = socket.read_msg();
+            std::string command_str = socket.read_msg();
 
             // close the connection and exit the thread if client sends CMD_QUIT
-            cout << "client sent: " << command << " of length "
-                 << command.length() << std::endl;
-            if (CMD_QUIT.compare(command) == 0) {
+            if (CMD_QUIT.compare(command_str) == 0) {
                 break;
             }
 
             MemcacheExchange memcacheExchange;
-            memcacheExchange.command = command;
+            std::stringstream ss(command_str);
+            std::string token;
 
-            // check if command requires more input (set commands)
-            std::vector<std::string> tokens;
-            std::istringstream iss(command);
-            std::copy(std::istream_iterator<std::string>(iss),
-                      std::istream_iterator<std::string>(),
-                      std::back_inserter(tokens));
+            std::getline(ss, token, ' ');
+            memcacheExchange.command = token;
+            while (std::getline(ss, token, ' ')) {
+                memcacheExchange.args.push_back(token);
+            }
+            cout << "command: " << memcacheExchange.command << endl;
+            cout << "args: ";
+            for (int i = 0; i < memcacheExchange.args.size(); ++i) {
+                cout << memcacheExchange.args[i] << ", ";
+            }
+            cout << endl;
 
-            if (COMMANDS_WITH_VALUES.find(tokens[0]) !=
+            if (COMMANDS_WITH_VALUES.find(memcacheExchange.command) !=
                 COMMANDS_WITH_VALUES.end()) {
                 // TODO: error handling
-                memcacheExchange.value = socket.read_msg(stoi(tokens[4]));
+                memcacheExchange.value =
+                    socket.read_msg(stoi(memcacheExchange.args[3]));
             }
 
-            // call MemcacheStore::set/MemcacheStore::get
+            // execute command
+            MemcacheAbstractCommand* command = resolve(memcacheExchange);
+            if (command == nullptr) {
+                cerr << GENERIC_ERROR;
+                continue;
+            }
+            MemcacheExchange output = command->execute(memcacheExchange);
+            cout << "got output: " << output.value << endl;
+            cout << "str: " << output.to_str() << endl;
+            socket.send_msg(output.to_str());
 
-            // write result to buffer
-            // send buffer
+            delete command;
         }
 
         socket.cleanup();
