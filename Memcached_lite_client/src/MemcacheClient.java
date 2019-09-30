@@ -7,23 +7,6 @@ public class MemcacheClient {
     private Socket socket;
     private DataInputStream in;
 
-    public static void main(String[] args) {
-        if (args.length < 2) {
-            System.err.println("Usage Client <server_host> <server_port>");
-            System.exit(0);
-        }
-        String host = args[0];
-        int port = Integer.parseInt(args[1]);
-
-        try {
-            MemcacheClient client = new MemcacheClient(host, port);
-            client.set("key", "first line\r\nsecond line\r\n\r\nfourth line");
-            System.out.println("client.get(key): " + client.get("key"));
-        } catch (Exception e) {
-            System.err.println(e);
-        }
-    }
-
     public MemcacheClient(String host, int port) throws Exception {
         socket = new Socket(host, port);
         in = new DataInputStream(socket.getInputStream());
@@ -87,5 +70,11 @@ public class MemcacheClient {
         } catch (Exception e) {
             return null;
         }
+    }
+
+    public void close() {
+        try {
+            socket.close();
+        } catch(Exception e) {}
     }
 }
