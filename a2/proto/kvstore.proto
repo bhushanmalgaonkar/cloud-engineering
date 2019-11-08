@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+service KeyValueStore {
+    rpc CreateDirectory (Empty) returns (Id) {}
+    rpc Upload (stream DataBlock) returns (UploadStatus) {}
+    rpc Download (Id) returns (stream DataBlock)
+}
+
+message Empty {}
+
+message Id {
+    string id = 1;
+}
+
+message DataBlock {
+    string dir_id = 1;
+    string doc_id = 2;
+    string data = 3;
+}
+
+message UploadStatus {
+    string status = 1;
+}

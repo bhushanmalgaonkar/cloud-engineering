@@ -1,0 +1,6 @@
+#!/usr/bin/python3
+
+string = 'fun'
+
+import string
+print(fun.add(1, 2))

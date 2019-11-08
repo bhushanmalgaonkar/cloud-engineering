@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+// service MapReduce {
+//     rpc submitJob (Job) returns () {}
+//     rpc execute(Job) returns () {}
+// }
+
+// message Job {
+//     string code_id = 1;
+//     string file_id = 1;
+// }
