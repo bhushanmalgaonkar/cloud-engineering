@@ -20,7 +20,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='',
   syntax='proto3',
   serialized_options=None,
-  serialized_pb=_b('\n\rkvstore.proto\"\x07\n\x05\x45mpty\"\x10\n\x02Id\x12\n\n\x02id\x18\x01 \x01(\t\"9\n\tDataBlock\x12\x0e\n\x06\x64ir_id\x18\x01 \x01(\t\x12\x0e\n\x06\x64oc_id\x18\x02 \x01(\t\x12\x0c\n\x04\x64\x61ta\x18\x03 \x01(\t\"\x1e\n\x0cUploadStatus\x12\x0e\n\x06status\x18\x01 \x01(\t2Z\n\rKeyValueStore\x12 \n\x0f\x43reateDirectory\x12\x06.Empty\x1a\x03.Id\"\x00\x12\'\n\x06Upload\x12\n.DataBlock\x1a\r.UploadStatus\"\x00(\x01\x62\x06proto3')
+  serialized_pb=_b('\n\rkvstore.proto\"\x07\n\x05\x45mpty\"\x10\n\x02Id\x12\n\n\x02id\x18\x01 \x01(\t\"9\n\tDataBlock\x12\x0e\n\x06\x64ir_id\x18\x01 \x01(\t\x12\x0e\n\x06\x64oc_id\x18\x02 \x01(\t\x12\x0c\n\x04\x64\x61ta\x18\x03 \x01(\t\"\x1e\n\x0cUploadStatus\x12\x0e\n\x06status\x18\x01 \x01(\t2\x7f\n\rKeyValueStore\x12 \n\x0f\x43reateDirectory\x12\x06.Empty\x1a\x03.Id\"\x00\x12+\n\nUploadFile\x12\n.DataBlock\x1a\r.UploadStatus\"\x00(\x01\x12\x1f\n\x08\x44ownload\x12\x03.Id\x1a\n.DataBlock\"\x00\x30\x01\x62\x06proto3')
 )
 
 
@@ -199,7 +199,7 @@ _KEYVALUESTORE = _descriptor.ServiceDescriptor(
   index=0,
   serialized_options=None,
   serialized_start=135,
-  serialized_end=225,
+  serialized_end=262,
   methods=[
   _descriptor.MethodDescriptor(
     name='CreateDirectory',
@@ -211,12 +211,21 @@ _KEYVALUESTORE = _descriptor.ServiceDescriptor(
     serialized_options=None,
   ),
   _descriptor.MethodDescriptor(
-    name='Upload',
-    full_name='KeyValueStore.Upload',
+    name='UploadFile',
+    full_name='KeyValueStore.UploadFile',
     index=1,
     containing_service=None,
     input_type=_DATABLOCK,
     output_type=_UPLOADSTATUS,
+    serialized_options=None,
+  ),
+  _descriptor.MethodDescriptor(
+    name='Download',
+    full_name='KeyValueStore.Download',
+    index=2,
+    containing_service=None,
+    input_type=_ID,
+    output_type=_DATABLOCK,
     serialized_options=None,
   ),
 ])

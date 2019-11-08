@@ -2,8 +2,8 @@ syntax = "proto3";
 
 service KeyValueStore {
     rpc CreateDirectory (Empty) returns (Id) {}
-    rpc Upload (stream DataBlock) returns (UploadStatus) {}
-    rpc Download (Id) returns (stream DataBlock)
+    rpc UploadFile (stream DataBlock) returns (UploadStatus) {}
+    rpc Download (Id) returns (stream DataBlock) {}
 }
 
 message Empty {}

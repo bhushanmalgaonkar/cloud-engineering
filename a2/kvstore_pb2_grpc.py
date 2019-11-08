@@ -19,10 +19,15 @@ class KeyValueStoreStub(object):
         request_serializer=kvstore__pb2.Empty.SerializeToString,
         response_deserializer=kvstore__pb2.Id.FromString,
         )
-    self.Upload = channel.stream_unary(
-        '/KeyValueStore/Upload',
+    self.UploadFile = channel.stream_unary(
+        '/KeyValueStore/UploadFile',
         request_serializer=kvstore__pb2.DataBlock.SerializeToString,
         response_deserializer=kvstore__pb2.UploadStatus.FromString,
+        )
+    self.Download = channel.unary_stream(
+        '/KeyValueStore/Download',
+        request_serializer=kvstore__pb2.Id.SerializeToString,
+        response_deserializer=kvstore__pb2.DataBlock.FromString,
         )
 
 
@@ -37,7 +42,14 @@ class KeyValueStoreServicer(object):
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
-  def Upload(self, request_iterator, context):
+  def UploadFile(self, request_iterator, context):
+    # missing associated documentation comment in .proto file
+    pass
+    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+    context.set_details('Method not implemented!')
+    raise NotImplementedError('Method not implemented!')
+
+  def Download(self, request, context):
     # missing associated documentation comment in .proto file
     pass
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
@@ -52,10 +64,15 @@ def add_KeyValueStoreServicer_to_server(servicer, server):
           request_deserializer=kvstore__pb2.Empty.FromString,
           response_serializer=kvstore__pb2.Id.SerializeToString,
       ),
-      'Upload': grpc.stream_unary_rpc_method_handler(
-          servicer.Upload,
+      'UploadFile': grpc.stream_unary_rpc_method_handler(
+          servicer.UploadFile,
           request_deserializer=kvstore__pb2.DataBlock.FromString,
           response_serializer=kvstore__pb2.UploadStatus.SerializeToString,
+      ),
+      'Download': grpc.unary_stream_rpc_method_handler(
+          servicer.Download,
+          request_deserializer=kvstore__pb2.Id.FromString,
+          response_serializer=kvstore__pb2.DataBlock.SerializeToString,
       ),
   }
   generic_handler = grpc.method_handlers_generic_handler(

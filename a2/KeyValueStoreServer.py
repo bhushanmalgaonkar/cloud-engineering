@@ -1,8 +1,10 @@
 #!/usr/bin/python3
 
+import os
 import time
 import threading
-import sqlite3
+import sqlalchemy as db
+from sqlalchemy.pool import QueuePool
 from datetime import datetime
 
 import grpc
@@ -13,13 +15,14 @@ import kvstore_pb2, kvstore_pb2_grpc
 from Constants import *
 
 DB_PATH = 'kvstore.db'
+ROOT_DIR = 'chunks'
 
-class Listener(kvstore_pb2_grpc.KeyValueStoreServicer):
-    def __init__(self, *args, **kwargs):
-        self.db = sqlite3.connect(DB_PATH)
+class DataBaseHandler:
+    def __init__(self, path):
+        self.engine = db.create_engine('sqlite:///{}'.format(path))
 
-        c = self.db.cursor()
-        c.execute(""" CREATE TABLE IF NOT EXISTS chunks (
+        conn = self.engine.connect()        
+        conn.execute(""" CREATE TABLE IF NOT EXISTS chunks (
                         dir_id text NOT NULL,
                         doc_id text NOT NULL,
                         chunk_index int NOT NULL,
@@ -36,7 +39,7 @@ class Listener(kvstore_pb2_grpc.KeyValueStoreServicer):
                 1. collect output of mappers to give to reducers
                 2. collect output of reducer to answer user query
         '''
-        c.execute(""" CREATE TABLE IF NOT EXISTS executions (
+        conn.execute(""" CREATE TABLE IF NOT EXISTS executions (
                         exec_id text NOT NULL,
                         exec_type text NOT NULL,
                         chunk_id text NOT NULL,
@@ -47,14 +50,41 @@ class Listener(kvstore_pb2_grpc.KeyValueStoreServicer):
         '''
             stores execution status and result of entire map-reduce job
         '''
-        c.execute(""" CREATE TABLE IF NOT EXISTS jobs (
+        conn.execute(""" CREATE TABLE IF NOT EXISTS jobs (
                         exec_id text NOT NULL,
                         code_id text NOT NULL,
                         dir_id text NOT NULL,
                         status text NOT NULL,
                         result_id text NOT NULL
                     ); """)
-        
+
+        # metadata = db.MetaData()
+        # self.chunks_table = db.Table('chunks', metadata, autoload=True, autoload_with=engine)
+        # self.executions_table = db.Table('executions', metadata, autoload=True, autoload_with=engine)
+        # self.jobs_table = db.Table('jobs', metadata, autoload=True, autoload_with=engine)
+
+    def execute(self, sql, params):
+        conn = self.engine.connect()
+        trans = conn.begin()
+        try:
+            conn.execute(sql, params)
+            trans.commit()
+        except:
+            trans.rollback()
+        conn.close()
+
+    def execute_and_return(self, sql, params):
+        conn = self.engine.connect()
+        rs = conn.execute(sql, params)
+        conn.close()
+        return rs
+
+class Listener(kvstore_pb2_grpc.KeyValueStoreServicer):
+    def __init__(self, *args, **kwargs):
+        self.db = DataBaseHandler(DB_PATH)
+        if not os.path.exists(ROOT_DIR):
+            os.makedirs(ROOT_DIR)
+
     '''
         Creates and returns random id that is very unlikely to occur twice
     '''
@@ -66,39 +96,38 @@ class Listener(kvstore_pb2_grpc.KeyValueStoreServicer):
         The client can send this id in upload requests to keep files together.
     '''
     def CreateDirectory(self, request, context):
-        return self.getBlockName()
+        return kvstore_pb2.Id(id = self.getBlockName())
 
     '''
         Saves the block of data on disk and updates table 'chunks' to keep track
     '''
-    def Upload(self, data_block_itr, context):
-        chunk_index = 0
-        for data_block in data_block_itr:
-            blockfilename = self.getBlockName()
-            with open(blockfilename, 'a') as f:
-                f.write(data_block.data)
+    def UploadFile(self, data_block_itr, context):
+        print('in upload', threading.get_ident())
+        try:
+            chunk_index = 0
+            for data_block in data_block_itr:
+                blockfilename = os.path.join(ROOT_DIR, self.getBlockName())
+                with open(blockfilename, 'a') as f:
+                    f.write(data_block.data)
 
-            c = self.db.cursor()
-            c.execute(""" INSERT INTO chunks (dir_id, doc_id, chunk_index, chunk_id)
-                            VALUES (?, ?, ?, ?) """, \
-                            (data_block.dir_id, data_block.doc_id, chunk_index, blockfilename))
-            chunk_index += 1
+                self.db.execute(""" INSERT INTO chunks (dir_id, doc_id, chunk_index, chunk_id)
+                                VALUES (?, ?, ?, ?) """, \
+                                (data_block.dir_id, data_block.doc_id, chunk_index, blockfilename))
+                chunk_index += 1
+            return kvstore_pb2.UploadStatus(status = 'success')
+        except:
+            return kvstore_pb2.UploadStatus(status = 'failed')
 
     def Download(self, id, context):
-        
-
-    # def get(self, file_id, context):
-    #     filename = file_id.id
-    #     if filename.endswith('-b'):
-    #         with open(filename.strip('\n'), 'r') as f:
-    #             for line in f:
-    #                 yield kvstore_pb2.FileData(data = line)
-    #     elif filename.endswith('-r'):
-    #         with open(filename, 'r') as rf:
-    #             for blockfile in rf:
-    #                 with open(blockfile.strip('\n'), 'r') as f:
-    #                     for line in f:  
-    #                         yield kvstore_pb2.FileData(data = line)
+        # c = self.db.cursor()
+        # c.execute(""" SELECT dir_id, doc_id, chunk_index, chunk_id 
+        #                 FROM chunks
+        #                 WHERE dir_id = ?
+        #                 ORDER BY doc_id, chunk_index """, \
+        #                     (id.id))
+        # for row in c:
+        #     print('select query result: ', row)
+        pass
 
 def run_server():
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=4))

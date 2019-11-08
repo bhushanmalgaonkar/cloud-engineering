@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 import os
+import sys
 import grpc
 
 import kvstore_pb2, kvstore_pb2_grpc
@@ -37,18 +38,21 @@ def upload_directory(path):
         # create an id to keep all files in the directory together on the server
         # all the files can be accessed using this id
         dir_id = stub.CreateDirectory(kvstore_pb2.Empty()).id
+        print('dir_id: {}'.format(dir_id))
 
         # recursively upload all the files in the given directory
         for r, d, f in os.walk(path):
             for file in f:
                 filepath = os.path.join(r, file)
                 
-                print('Uploading {}'.format(filepath))
-                status = stub.Upload(file_iterator(dir_id, filepath))
-                if status.status == 'success':
-                    break
+                for _ in range(3):
+                    print('Uploading {}'.format(filepath))
+                    status = stub.UploadFile(file_iterator(dir_id, filepath))
+                    if status.status == 'success':
+                        break
+                    print('Uploading {} failed'.format(filepath))
 
         channel.unsubscribe(close)    
 
 if __name__ == "__main__":
-    run_client()
+    upload_directory(sys.argv[1])
