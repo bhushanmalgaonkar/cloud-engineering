@@ -14,18 +14,13 @@ class KeyValueStoreStub(object):
     Args:
       channel: A grpc.Channel.
     """
-    self.CreateDirectory = channel.unary_unary(
-        '/KeyValueStore/CreateDirectory',
-        request_serializer=kvstore__pb2.Empty.SerializeToString,
-        response_deserializer=kvstore__pb2.Id.FromString,
-        )
-    self.UploadFile = channel.stream_unary(
-        '/KeyValueStore/UploadFile',
+    self.Save = channel.unary_unary(
+        '/KeyValueStore/Save',
         request_serializer=kvstore__pb2.DataBlock.SerializeToString,
-        response_deserializer=kvstore__pb2.UploadStatus.FromString,
+        response_deserializer=kvstore__pb2.SaveStatus.FromString,
         )
-    self.Download = channel.unary_stream(
-        '/KeyValueStore/Download',
+    self.Get = channel.unary_unary(
+        '/KeyValueStore/Get',
         request_serializer=kvstore__pb2.Id.SerializeToString,
         response_deserializer=kvstore__pb2.DataBlock.FromString,
         )
@@ -35,21 +30,14 @@ class KeyValueStoreServicer(object):
   # missing associated documentation comment in .proto file
   pass
 
-  def CreateDirectory(self, request, context):
+  def Save(self, request, context):
     # missing associated documentation comment in .proto file
     pass
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
     context.set_details('Method not implemented!')
     raise NotImplementedError('Method not implemented!')
 
-  def UploadFile(self, request_iterator, context):
-    # missing associated documentation comment in .proto file
-    pass
-    context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-    context.set_details('Method not implemented!')
-    raise NotImplementedError('Method not implemented!')
-
-  def Download(self, request, context):
+  def Get(self, request, context):
     # missing associated documentation comment in .proto file
     pass
     context.set_code(grpc.StatusCode.UNIMPLEMENTED)
@@ -59,18 +47,13 @@ class KeyValueStoreServicer(object):
 
 def add_KeyValueStoreServicer_to_server(servicer, server):
   rpc_method_handlers = {
-      'CreateDirectory': grpc.unary_unary_rpc_method_handler(
-          servicer.CreateDirectory,
-          request_deserializer=kvstore__pb2.Empty.FromString,
-          response_serializer=kvstore__pb2.Id.SerializeToString,
-      ),
-      'UploadFile': grpc.stream_unary_rpc_method_handler(
-          servicer.UploadFile,
+      'Save': grpc.unary_unary_rpc_method_handler(
+          servicer.Save,
           request_deserializer=kvstore__pb2.DataBlock.FromString,
-          response_serializer=kvstore__pb2.UploadStatus.SerializeToString,
+          response_serializer=kvstore__pb2.SaveStatus.SerializeToString,
       ),
-      'Download': grpc.unary_stream_rpc_method_handler(
-          servicer.Download,
+      'Get': grpc.unary_unary_rpc_method_handler(
+          servicer.Get,
           request_deserializer=kvstore__pb2.Id.FromString,
           response_serializer=kvstore__pb2.DataBlock.SerializeToString,
       ),

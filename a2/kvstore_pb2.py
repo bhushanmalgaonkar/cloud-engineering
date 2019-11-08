@@ -20,34 +20,10 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='',
   syntax='proto3',
   serialized_options=None,
-  serialized_pb=_b('\n\rkvstore.proto\"\x07\n\x05\x45mpty\"\x10\n\x02Id\x12\n\n\x02id\x18\x01 \x01(\t\"9\n\tDataBlock\x12\x0e\n\x06\x64ir_id\x18\x01 \x01(\t\x12\x0e\n\x06\x64oc_id\x18\x02 \x01(\t\x12\x0c\n\x04\x64\x61ta\x18\x03 \x01(\t\"\x1e\n\x0cUploadStatus\x12\x0e\n\x06status\x18\x01 \x01(\t2\x7f\n\rKeyValueStore\x12 \n\x0f\x43reateDirectory\x12\x06.Empty\x1a\x03.Id\"\x00\x12+\n\nUploadFile\x12\n.DataBlock\x1a\r.UploadStatus\"\x00(\x01\x12\x1f\n\x08\x44ownload\x12\x03.Id\x1a\n.DataBlock\"\x00\x30\x01\x62\x06proto3')
+  serialized_pb=_b('\n\rkvstore.proto\"\x10\n\x02Id\x12\n\n\x02id\x18\x01 \x01(\t\"6\n\tDataBlock\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t\x12\r\n\x05\x65rror\x18\x03 \x01(\x08\"\x1c\n\nSaveStatus\x12\x0e\n\x06status\x18\x01 \x01(\t2L\n\rKeyValueStore\x12!\n\x04Save\x12\n.DataBlock\x1a\x0b.SaveStatus\"\x00\x12\x18\n\x03Get\x12\x03.Id\x1a\n.DataBlock\"\x00\x62\x06proto3')
 )
 
 
-
-
-_EMPTY = _descriptor.Descriptor(
-  name='Empty',
-  full_name='Empty',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  fields=[
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=17,
-  serialized_end=24,
-)
 
 
 _ID = _descriptor.Descriptor(
@@ -76,8 +52,8 @@ _ID = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=26,
-  serialized_end=42,
+  serialized_start=17,
+  serialized_end=33,
 )
 
 
@@ -89,23 +65,23 @@ _DATABLOCK = _descriptor.Descriptor(
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='dir_id', full_name='DataBlock.dir_id', index=0,
+      name='key', full_name='DataBlock.key', index=0,
       number=1, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='doc_id', full_name='DataBlock.doc_id', index=1,
+      name='value', full_name='DataBlock.value', index=1,
       number=2, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='data', full_name='DataBlock.data', index=2,
-      number=3, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
+      name='error', full_name='DataBlock.error', index=2,
+      number=3, type=8, cpp_type=7, label=1,
+      has_default_value=False, default_value=False,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
@@ -121,20 +97,20 @@ _DATABLOCK = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=44,
-  serialized_end=101,
+  serialized_start=35,
+  serialized_end=89,
 )
 
 
-_UPLOADSTATUS = _descriptor.Descriptor(
-  name='UploadStatus',
-  full_name='UploadStatus',
+_SAVESTATUS = _descriptor.Descriptor(
+  name='SaveStatus',
+  full_name='SaveStatus',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='status', full_name='UploadStatus.status', index=0,
+      name='status', full_name='SaveStatus.status', index=0,
       number=1, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
@@ -152,22 +128,14 @@ _UPLOADSTATUS = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=103,
-  serialized_end=133,
+  serialized_start=91,
+  serialized_end=119,
 )
 
-DESCRIPTOR.message_types_by_name['Empty'] = _EMPTY
 DESCRIPTOR.message_types_by_name['Id'] = _ID
 DESCRIPTOR.message_types_by_name['DataBlock'] = _DATABLOCK
-DESCRIPTOR.message_types_by_name['UploadStatus'] = _UPLOADSTATUS
+DESCRIPTOR.message_types_by_name['SaveStatus'] = _SAVESTATUS
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
-
-Empty = _reflection.GeneratedProtocolMessageType('Empty', (_message.Message,), {
-  'DESCRIPTOR' : _EMPTY,
-  '__module__' : 'kvstore_pb2'
-  # @@protoc_insertion_point(class_scope:Empty)
-  })
-_sym_db.RegisterMessage(Empty)
 
 Id = _reflection.GeneratedProtocolMessageType('Id', (_message.Message,), {
   'DESCRIPTOR' : _ID,
@@ -183,12 +151,12 @@ DataBlock = _reflection.GeneratedProtocolMessageType('DataBlock', (_message.Mess
   })
 _sym_db.RegisterMessage(DataBlock)
 
-UploadStatus = _reflection.GeneratedProtocolMessageType('UploadStatus', (_message.Message,), {
-  'DESCRIPTOR' : _UPLOADSTATUS,
+SaveStatus = _reflection.GeneratedProtocolMessageType('SaveStatus', (_message.Message,), {
+  'DESCRIPTOR' : _SAVESTATUS,
   '__module__' : 'kvstore_pb2'
-  # @@protoc_insertion_point(class_scope:UploadStatus)
+  # @@protoc_insertion_point(class_scope:SaveStatus)
   })
-_sym_db.RegisterMessage(UploadStatus)
+_sym_db.RegisterMessage(SaveStatus)
 
 
 
@@ -198,31 +166,22 @@ _KEYVALUESTORE = _descriptor.ServiceDescriptor(
   file=DESCRIPTOR,
   index=0,
   serialized_options=None,
-  serialized_start=135,
-  serialized_end=262,
+  serialized_start=121,
+  serialized_end=197,
   methods=[
   _descriptor.MethodDescriptor(
-    name='CreateDirectory',
-    full_name='KeyValueStore.CreateDirectory',
+    name='Save',
+    full_name='KeyValueStore.Save',
     index=0,
     containing_service=None,
-    input_type=_EMPTY,
-    output_type=_ID,
-    serialized_options=None,
-  ),
-  _descriptor.MethodDescriptor(
-    name='UploadFile',
-    full_name='KeyValueStore.UploadFile',
-    index=1,
-    containing_service=None,
     input_type=_DATABLOCK,
-    output_type=_UPLOADSTATUS,
+    output_type=_SAVESTATUS,
     serialized_options=None,
   ),
   _descriptor.MethodDescriptor(
-    name='Download',
-    full_name='KeyValueStore.Download',
-    index=2,
+    name='Get',
+    full_name='KeyValueStore.Get',
+    index=1,
     containing_service=None,
     input_type=_ID,
     output_type=_DATABLOCK,
