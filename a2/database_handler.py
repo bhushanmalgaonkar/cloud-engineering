@@ -80,3 +80,8 @@ class DataBaseHandler:
                                 WHERE dir_id = ?
                                 ORDER BY doc_id, chunk_index """, (dir_id))
         return rs
+
+    def get_doc_metadata(self, dir_id):
+        return self.execute_and_return(""" SELECT DISTINCT doc_id
+                                FROM chunks
+                                WHERE dir_id = ? """, (dir_id))

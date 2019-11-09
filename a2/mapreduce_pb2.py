@@ -20,12 +20,128 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='',
   syntax='proto3',
   serialized_options=None,
-  serialized_pb=_b('\n\x0fmapreduce.protob\x06proto3')
+  serialized_pb=_b('\n\x0fmapreduce.proto\"\'\n\x03Job\x12\x0f\n\x07\x63ode_id\x18\x01 \x01(\t\x12\x0f\n\x07\x64\x61ta_id\x18\x02 \x01(\t\"0\n\rExecutionInfo\x12\x0f\n\x07\x65xec_id\x18\x01 \x01(\t\x12\x0e\n\x06status\x18\x02 \x01(\t28\n\x0fMapReduceMaster\x12%\n\tSubmitJob\x12\x04.Job\x1a\x0e.ExecutionInfo\"\x00\x30\x01\x62\x06proto3')
 )
 
 
 
+
+_JOB = _descriptor.Descriptor(
+  name='Job',
+  full_name='Job',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='code_id', full_name='Job.code_id', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='data_id', full_name='Job.data_id', index=1,
+      number=2, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=19,
+  serialized_end=58,
+)
+
+
+_EXECUTIONINFO = _descriptor.Descriptor(
+  name='ExecutionInfo',
+  full_name='ExecutionInfo',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='exec_id', full_name='ExecutionInfo.exec_id', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='status', full_name='ExecutionInfo.status', index=1,
+      number=2, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=60,
+  serialized_end=108,
+)
+
+DESCRIPTOR.message_types_by_name['Job'] = _JOB
+DESCRIPTOR.message_types_by_name['ExecutionInfo'] = _EXECUTIONINFO
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
+Job = _reflection.GeneratedProtocolMessageType('Job', (_message.Message,), {
+  'DESCRIPTOR' : _JOB,
+  '__module__' : 'mapreduce_pb2'
+  # @@protoc_insertion_point(class_scope:Job)
+  })
+_sym_db.RegisterMessage(Job)
+
+ExecutionInfo = _reflection.GeneratedProtocolMessageType('ExecutionInfo', (_message.Message,), {
+  'DESCRIPTOR' : _EXECUTIONINFO,
+  '__module__' : 'mapreduce_pb2'
+  # @@protoc_insertion_point(class_scope:ExecutionInfo)
+  })
+_sym_db.RegisterMessage(ExecutionInfo)
+
+
+
+_MAPREDUCEMASTER = _descriptor.ServiceDescriptor(
+  name='MapReduceMaster',
+  full_name='MapReduceMaster',
+  file=DESCRIPTOR,
+  index=0,
+  serialized_options=None,
+  serialized_start=110,
+  serialized_end=166,
+  methods=[
+  _descriptor.MethodDescriptor(
+    name='SubmitJob',
+    full_name='MapReduceMaster.SubmitJob',
+    index=0,
+    containing_service=None,
+    input_type=_JOB,
+    output_type=_EXECUTIONINFO,
+    serialized_options=None,
+  ),
+])
+_sym_db.RegisterServiceDescriptor(_MAPREDUCEMASTER)
+
+DESCRIPTOR.services_by_name['MapReduceMaster'] = _MAPREDUCEMASTER
 
 # @@protoc_insertion_point(module_scope)

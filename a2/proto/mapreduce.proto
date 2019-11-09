@@ -1,11 +1,19 @@
 syntax = "proto3";
 
-// service MapReduce {
-//     rpc submitJob (Job) returns () {}
+service MapReduceMaster {
+    rpc SubmitJob (Job) returns (stream ExecutionInfo) {}
+}
+
+// service MapReduceWorker {
 //     rpc execute(Job) returns () {}
 // }
 
-// message Job {
-//     string code_id = 1;
-//     string file_id = 1;
-// }
+message Job {
+    string code_id = 1;
+    string data_id = 2;
+}
+
+message ExecutionInfo {
+    string exec_id = 1;
+    string status = 2;
+}

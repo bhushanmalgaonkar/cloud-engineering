@@ -10,22 +10,21 @@ from concurrent import futures
 from uuid import uuid4
 
 import kvstore_pb2, kvstore_pb2_grpc
-from Constants import *
-
-ROOT_DIR = 'chunks'
+from constants import KV_STORE_ROOT_DIR, KV_STORE_PORT
 
 class Listener(kvstore_pb2_grpc.KeyValueStoreServicer):
     def __init__(self, *args, **kwargs):
         try:
-            if not os.path.exists(ROOT_DIR):
-                os.makedirs(ROOT_DIR)
+            if not os.path.exists(KV_STORE_ROOT_DIR):
+                os.makedirs(KV_STORE_ROOT_DIR)
         except:
-            print('Error creating base director \'chunks\'.')
+            print('Error creating base director \'{}\'.'.format(KV_STORE_ROOT_DIR))
             exit(1)
 
     def Save(self, data_block, context):
+        print('saving: ', data_block.value)
         try:
-            blockfilename = os.path.join(ROOT_DIR, data_block.key)
+            blockfilename = os.path.join(KV_STORE_ROOT_DIR, data_block.key)
             with open(blockfilename, 'w') as f:
                 f.write(data_block.value)
             return kvstore_pb2.SaveStatus(status = 'success')
@@ -34,9 +33,9 @@ class Listener(kvstore_pb2_grpc.KeyValueStoreServicer):
 
     def Get(self, id, context):
         try:
-            blockfilename = os.path.join(ROOT_DIR, id.id)
+            blockfilename = os.path.join(KV_STORE_ROOT_DIR, id.id)
             with open(blockfilename, 'r') as f:
-                data = '\n'.join(f.readlines())
+                data = ''.join(f.readlines())
             return kvstore_pb2.DataBlock(key = id.id, value = data, error = False)
         except:
             return kvstore_pb2.DataBlock(key = id.id, value = 'NULL', error = True)
