@@ -20,7 +20,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='',
   syntax='proto3',
   serialized_options=None,
-  serialized_pb=_b('\n\x0fmapreduce.proto\"\'\n\x03Job\x12\x0f\n\x07\x63ode_id\x18\x01 \x01(\t\x12\x0f\n\x07\x64\x61ta_id\x18\x02 \x01(\t\"0\n\rExecutionInfo\x12\x0f\n\x07\x65xec_id\x18\x01 \x01(\t\x12\x0e\n\x06status\x18\x02 \x01(\t28\n\x0fMapReduceMaster\x12%\n\tSubmitJob\x12\x04.Job\x1a\x0e.ExecutionInfo\"\x00\x30\x01\x62\x06proto3')
+  serialized_pb=_b('\n\x0fmapreduce.proto\"\'\n\x03Job\x12\x0f\n\x07\x63ode_id\x18\x01 \x01(\t\x12\x0f\n\x07\x64\x61ta_id\x18\x02 \x01(\t\"0\n\rExecutionInfo\x12\x0f\n\x07\x65xec_id\x18\x01 \x01(\t\x12\x0e\n\x06status\x18\x02 \x01(\t\"W\n\x04Task\x12\x0f\n\x07\x63ode_id\x18\x01 \x01(\t\x12\x10\n\x08\x63hunk_id\x18\x02 \x01(\t\x12\x0c\n\x04type\x18\x03 \x01(\t\x12\x0e\n\x06\x64ir_id\x18\x04 \x01(\t\x12\x0e\n\x06\x64oc_id\x18\x05 \x01(\t28\n\x0fMapReduceMaster\x12%\n\tSubmitJob\x12\x04.Job\x1a\x0e.ExecutionInfo\"\x00\x30\x01\x32\x35\n\x0fMapReduceWorker\x12\"\n\x07\x45xecute\x12\x05.Task\x1a\x0e.ExecutionInfo\"\x00\x62\x06proto3')
 )
 
 
@@ -101,8 +101,68 @@ _EXECUTIONINFO = _descriptor.Descriptor(
   serialized_end=108,
 )
 
+
+_TASK = _descriptor.Descriptor(
+  name='Task',
+  full_name='Task',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='code_id', full_name='Task.code_id', index=0,
+      number=1, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='chunk_id', full_name='Task.chunk_id', index=1,
+      number=2, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='type', full_name='Task.type', index=2,
+      number=3, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='dir_id', full_name='Task.dir_id', index=3,
+      number=4, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='doc_id', full_name='Task.doc_id', index=4,
+      number=5, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  serialized_options=None,
+  is_extendable=False,
+  syntax='proto3',
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=110,
+  serialized_end=197,
+)
+
 DESCRIPTOR.message_types_by_name['Job'] = _JOB
 DESCRIPTOR.message_types_by_name['ExecutionInfo'] = _EXECUTIONINFO
+DESCRIPTOR.message_types_by_name['Task'] = _TASK
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 Job = _reflection.GeneratedProtocolMessageType('Job', (_message.Message,), {
@@ -119,6 +179,13 @@ ExecutionInfo = _reflection.GeneratedProtocolMessageType('ExecutionInfo', (_mess
   })
 _sym_db.RegisterMessage(ExecutionInfo)
 
+Task = _reflection.GeneratedProtocolMessageType('Task', (_message.Message,), {
+  'DESCRIPTOR' : _TASK,
+  '__module__' : 'mapreduce_pb2'
+  # @@protoc_insertion_point(class_scope:Task)
+  })
+_sym_db.RegisterMessage(Task)
+
 
 
 _MAPREDUCEMASTER = _descriptor.ServiceDescriptor(
@@ -127,8 +194,8 @@ _MAPREDUCEMASTER = _descriptor.ServiceDescriptor(
   file=DESCRIPTOR,
   index=0,
   serialized_options=None,
-  serialized_start=110,
-  serialized_end=166,
+  serialized_start=199,
+  serialized_end=255,
   methods=[
   _descriptor.MethodDescriptor(
     name='SubmitJob',
@@ -143,5 +210,29 @@ _MAPREDUCEMASTER = _descriptor.ServiceDescriptor(
 _sym_db.RegisterServiceDescriptor(_MAPREDUCEMASTER)
 
 DESCRIPTOR.services_by_name['MapReduceMaster'] = _MAPREDUCEMASTER
+
+
+_MAPREDUCEWORKER = _descriptor.ServiceDescriptor(
+  name='MapReduceWorker',
+  full_name='MapReduceWorker',
+  file=DESCRIPTOR,
+  index=1,
+  serialized_options=None,
+  serialized_start=257,
+  serialized_end=310,
+  methods=[
+  _descriptor.MethodDescriptor(
+    name='Execute',
+    full_name='MapReduceWorker.Execute',
+    index=0,
+    containing_service=None,
+    input_type=_TASK,
+    output_type=_EXECUTIONINFO,
+    serialized_options=None,
+  ),
+])
+_sym_db.RegisterServiceDescriptor(_MAPREDUCEWORKER)
+
+DESCRIPTOR.services_by_name['MapReduceWorker'] = _MAPREDUCEWORKER
 
 # @@protoc_insertion_point(module_scope)

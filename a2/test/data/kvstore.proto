@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+service KeyValueStore {
+    rpc Save (DataBlock) returns (SaveStatus) {}
+    rpc Get (Id) returns (DataBlock) {}
+}
+
+message Id {
+    string id = 1;
+}
+
+message DataBlock {
+    string key = 1;
+    string value = 2;
+    bool error = 3;
+}
+
+message SaveStatus {
+    string status = 1;
+}

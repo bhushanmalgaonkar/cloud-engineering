@@ -34,3 +34,22 @@ def file_iterator(filepath):
         
         if block_size > 0:
             yield (chunk_index, ''.join(block))
+
+
+def str_iterator(string):
+    block = []
+    block_size = 0
+    chunk_index = 0
+    for splt in string.split('\n'):
+        line = splt + '\n'
+        
+        block.append(line)
+        block_size += len(line)
+        if block_size > KV_STORE_BLOCK_SIZE:
+            yield (chunk_index, ''.join(block))
+            block.clear()
+            block_size = 0
+            chunk_index += 1
+        
+    if block_size > 0:
+        yield (chunk_index, ''.join(block))

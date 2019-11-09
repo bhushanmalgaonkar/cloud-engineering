@@ -4,9 +4,9 @@ service MapReduceMaster {
     rpc SubmitJob (Job) returns (stream ExecutionInfo) {}
 }
 
-// service MapReduceWorker {
-//     rpc execute(Job) returns () {}
-// }
+service MapReduceWorker {
+    rpc Execute(Task) returns (ExecutionInfo) {}
+}
 
 message Job {
     string code_id = 1;
@@ -16,4 +16,14 @@ message Job {
 message ExecutionInfo {
     string exec_id = 1;
     string status = 2;
+}
+
+message Task {
+    string code_id = 1;
+    string chunk_id = 2;
+    string type = 3;   // map/reduce
+
+    // where to store the result
+    string dir_id = 4;
+    string doc_id = 5;
 }

@@ -14,10 +14,16 @@ def close(channel):
 
 def submit_job(dir_data, dir_code):
     try:
+        print('reading data from: ', dir_data)
+        print('reading code from: ', dir_code)
+
         # upload data and code to key-value store
         kv_store = KeyValueStoreClient()
         data_id = kv_store.upload_directory(dir_data)
         code_id = kv_store.upload_directory(dir_code)
+
+        print('data is saved with data_id: ', data_id, type(data_id))
+        print('code is saved with code_id: ', code_id, type(code_id))
 
         # rpc call submit job with data_id and code_id
         with grpc.insecure_channel("{}:{}".format(MAP_REDUCE_MASTER_HOST, MAP_REDUCE_MASTER_PORT)) as channel:
@@ -29,7 +35,8 @@ def submit_job(dir_data, dir_code):
 
             channel.unsubscribe(close)
     except BaseException as e:
-        print('Failed submitting the job. Error: {}'.format(e))
+        print('mrclient: Failed submitting the job. Error: {}'.format(e))
+        raise e
 
 
 if __name__ == "__main__":

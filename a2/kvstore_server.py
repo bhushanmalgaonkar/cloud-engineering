@@ -22,7 +22,6 @@ class Listener(kvstore_pb2_grpc.KeyValueStoreServicer):
             exit(1)
 
     def Save(self, data_block, context):
-        print('saving: ', data_block.value)
         try:
             blockfilename = os.path.join(KV_STORE_ROOT_DIR, data_block.key)
             with open(blockfilename, 'w') as f:
@@ -41,14 +40,14 @@ class Listener(kvstore_pb2_grpc.KeyValueStoreServicer):
             return kvstore_pb2.DataBlock(key = id.id, value = 'NULL', error = True)
             
 
-def run_server():
+def run_server(port):
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=4))
     kvstore_pb2_grpc.add_KeyValueStoreServicer_to_server(Listener(), server)
-    server.add_insecure_port("[::]:{}".format(KV_STORE_PORT))
+    server.add_insecure_port("[::]:{}".format(port))
     server.start()
+    print('KeyValueStore server listening on port {}'.format(port))
     while True:
         try:
-            print(f"active threads: {threading.active_count()}")
             time.sleep(5)
         except KeyboardInterrupt:
             print("KeyboardInterrupt")
@@ -58,4 +57,4 @@ def run_server():
             pass
 
 if __name__ == "__main__":
-    run_server()
+    run_server(KV_STORE_PORT)

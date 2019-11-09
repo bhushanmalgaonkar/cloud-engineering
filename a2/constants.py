@@ -8,3 +8,9 @@ KV_STORE_BLOCK_SIZE = 1024 * 1024
 
 MAP_REDUCE_MASTER_HOST = 'localhost'
 MAP_REDUCE_MASTER_PORT = 9898
+
+INTERMEDIATE_OUTPUTS_DIR = 'intermediate_outputs'
+
+WORKERS = set([
+    ('localhost', 1201)
+])

@@ -7,7 +7,7 @@ import grpc
 import kvstore_pb2, kvstore_pb2_grpc
 from constants import KV_STORE_HOST, KV_STORE_PORT, KV_STORE_DB_PATH
 from database_handler import DataBaseHandler
-from util import generateId, file_iterator
+from util import generateId, file_iterator, str_iterator
 
 class KeyValueStoreClient:
     def __init__(self):
@@ -21,7 +21,6 @@ class KeyValueStoreClient:
     '''
     def __uploadfile(self, dir_id, filepath, stub):
         for chunk_index, chunk in file_iterator(filepath):
-            print('got chunk: ', chunk)
             # create unique chunk_id
             chunk_id = generateId()
             data_block = kvstore_pb2.DataBlock(key=chunk_id, value=chunk)
@@ -33,7 +32,7 @@ class KeyValueStoreClient:
 
             # save to database
             self.db.save_chunk(dir_id, filepath, chunk_index, chunk_id)
-            print('saved {} {} {} {}'.format(dir_id, filepath, chunk_index, chunk_id))
+            print('kvstore: saved {} {} {} {}'.format(dir_id, filepath, chunk_index, chunk_id))
 
     '''
         Adds a file to existing directory
@@ -46,6 +45,29 @@ class KeyValueStoreClient:
         else:
             self.__uploadfile(dir_id, filepath, stub)
 
+    def __uploadfilestr(self, dir_id, doc_id, string, stub):
+        for chunk_index, chunk in str_iterator(string):
+            # create unique chunk_id
+            chunk_id = generateId()
+            data_block = kvstore_pb2.DataBlock(key=chunk_id, value=chunk)
+
+            for _ in range(3):
+                save_status = stub.Save(data_block)
+                if save_status.status == 'success':
+                    break
+
+            # save to database
+            self.db.save_chunk(dir_id, doc_id, chunk_index, chunk_id)
+            print('kvstore: saved {} {} {} {}'.format(dir_id, doc_id, chunk_index, chunk_id))
+
+    def upload_file_str(self, dir_id, doc_id, string, stub=None):
+        if not stub:
+            with grpc.insecure_channel("{}:{}".format(KV_STORE_HOST, KV_STORE_PORT)) as channel:
+                stub = kvstore_pb2_grpc.KeyValueStoreStub(channel)
+                self.__uploadfilestr(dir_id, doc_id, string, stub)
+        else:
+            self.__uploadfilestr(dir_id, doc_id, string, stub)
+
     '''
         Stores all the files in the directory in the key-value store
     '''
@@ -53,7 +75,7 @@ class KeyValueStoreClient:
         # create an id to keep all files in the directory together on the server
         # all the files can be accessed using this id
         dir_id = generateId()
-        print('dir_id: {}'.format(dir_id))
+        print('kvstore: dir_id: {}'.format(dir_id))
         
         with grpc.insecure_channel("{}:{}".format(KV_STORE_HOST, KV_STORE_PORT)) as channel:
             stub = kvstore_pb2_grpc.KeyValueStoreStub(channel)
@@ -71,9 +93,8 @@ class KeyValueStoreClient:
     '''
         Private function that downloads a file
     '''
-    def __downloadfile(self, dir_id, doc_id, root, stub):
-        print(type(dir_id), type(doc_id))
-        save_path = os.path.join(root, doc_id)
+    def __downloadfile(self, dir_id, doc_id, root, flatten, stub):
+        save_path = os.path.join(root, os.path.basename(doc_id) if flatten else doc_id)
         if not os.path.exists(os.path.dirname(save_path)):
             os.makedirs(os.path.dirname(save_path))
         
@@ -86,24 +107,51 @@ class KeyValueStoreClient:
     '''
         Downloads single file from key-value store
     '''
-    def download_file(self, dir_id, doc_id, root, stub=None):
+    def download_file(self, dir_id, doc_id, root, flatten=False, stub=None):
         if not stub:
             with grpc.insecure_channel("{}:{}".format(KV_STORE_HOST, KV_STORE_PORT)) as channel:
                 stub = kvstore_pb2_grpc.KeyValueStoreStub(channel)
-                self.__downloadfile(dir_id, doc_id, root, stub)
+                self.__downloadfile(dir_id, doc_id, root, flatten, stub)
         else:
-            self.__downloadfile(dir_id, doc_id, root, stub)
+            self.__downloadfile(dir_id, doc_id, root, flatten, stub)
 
     '''
         Saves all the files associated with dir_id at save_path
     '''
-    def download_directory(self, dir_id, save_path):
+    def download_directory(self, dir_id, save_path, flatten=False):
         with grpc.insecure_channel("{}:{}".format(KV_STORE_HOST, KV_STORE_PORT)) as channel:
             stub = kvstore_pb2_grpc.KeyValueStoreStub(channel)
 
-            docs = self.db.get_doc_metadata(dir_id)
+            docs = self.get_doc_metadata(dir_id)
             for doc_id in docs:
-                self.__downloadfile(dir_id, doc_id[0], save_path, stub)
+                self.download_file(dir_id, doc_id[0], save_path, flatten, stub)
+
+    '''
+        Reads and returns chunk content as a string
+    '''
+    def read_chunk(self, chunk_id):
+        with grpc.insecure_channel("{}:{}".format(KV_STORE_HOST, KV_STORE_PORT)) as channel:
+            stub = kvstore_pb2_grpc.KeyValueStoreStub(channel)
+            data = stub.Get(kvstore_pb2.Id(id = chunk_id)).value
+            return data
+
+    '''
+        Downloads a chunk given chunk_id and saves it as file save_path
+    '''
+    def download_chunk(self, chunk_id, save_path):
+        data = self.read_chunk(chunk_id)
+        if data:
+            if not os.path.exists(os.path.dirname(save_path)):
+                os.makedirs(os.path.dirname(save_path))
+            
+            with open(save_path, 'w') as f:
+                f.write(data)
+        
+    '''
+        Returns all unique doc_ids associated with directory 
+    '''
+    def get_doc_metadata(self, dir_id):
+        return self.db.get_doc_metadata(dir_id)
 
     '''
         Returns all the chunks associated with given dir_id and optionally doc_id
@@ -115,5 +163,4 @@ class KeyValueStoreClient:
 if __name__ == "__main__":
     k = KeyValueStoreClient()
     dir_id = k.upload_directory(sys.argv[1])
-    print('saving')
-    k.download_directory(dir_id, 'proto-copy')
+    k.download_directory(dir_id, 'save_path', flatten=True)
