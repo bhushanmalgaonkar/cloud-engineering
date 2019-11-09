@@ -9,9 +9,9 @@
     
 2. **executions**: stores execution information of each individual worker task (map/reduce)
 
-    |    exec_id    | exec_type     | chunk_id      | status        | result_dir_id |
+    |    exec_id    | exec_type     | chunk_id      | status        | result_doc_id |
     | ------------- | ------------- | ------------- | ------------- | ------------- |
-    | Each execution gets unique id that client can use to track progress | map / reduce | Id of the chunk on which operation is being performed | pending / success / failure | location on the key-value server where result of the operation is stored |
+    | Each execution gets unique id that client can use to track progress | map / reduce | Id of the chunk on which operation is being performed | pending / success / failure | location on the key-value server where result of the operation is stored. output of a worker is stored as single document under exec_id directory |
     
 3. **jobs**: stores execution information of each job submitted to master
 
