@@ -1,4 +1,7 @@
+import os
+
 def mapper(doc_id, chunk):
+    doc_id = os.path.basename(doc_id)
     for ch in chunk.split():
         yield (ch, doc_id)
 

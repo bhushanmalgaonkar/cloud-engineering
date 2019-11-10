@@ -23,8 +23,8 @@ def submit_job(dir_data, dir_code, dir_output):
         data_id = kv_store.upload_directory(dir_data)
         code_id = kv_store.upload_directory(dir_code)
 
-        print('data is saved with data_id: ', data_id, type(data_id))
-        print('code is saved with code_id: ', code_id, type(code_id))
+        print('data is saved with data_id: ', data_id)
+        print('code is saved with code_id: ', code_id)
 
         # rpc call submit job with data_id and code_id
         with grpc.insecure_channel("{}:{}".format(MAP_REDUCE_MASTER_HOST, MAP_REDUCE_MASTER_PORT)) as channel:

@@ -20,7 +20,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='',
   syntax='proto3',
   serialized_options=None,
-  serialized_pb=_b('\n\x0fmapreduce.proto\"\'\n\x03Job\x12\x0f\n\x07\x63ode_id\x18\x01 \x01(\t\x12\x0f\n\x07\x64\x61ta_id\x18\x02 \x01(\t\"0\n\rExecutionInfo\x12\x0f\n\x07\x65xec_id\x18\x01 \x01(\t\x12\x0e\n\x06status\x18\x02 \x01(\t\"{\n\x04Task\x12\x0f\n\x07\x63ode_id\x18\x01 \x01(\t\x12\x10\n\x08\x63hunk_id\x18\x02 \x01(\t\x12\x14\n\x0cinput_doc_id\x18\x03 \x01(\t\x12\x0c\n\x04type\x18\x04 \x01(\t\x12\x15\n\routput_dir_id\x18\x05 \x01(\t\x12\x15\n\routput_doc_id\x18\x06 \x01(\t28\n\x0fMapReduceMaster\x12%\n\tSubmitJob\x12\x04.Job\x1a\x0e.ExecutionInfo\"\x00\x30\x01\x32\x35\n\x0fMapReduceWorker\x12\"\n\x07\x45xecute\x12\x05.Task\x1a\x0e.ExecutionInfo\"\x00\x62\x06proto3')
+  serialized_pb=_b('\n\x0fmapreduce.proto\"\'\n\x03Job\x12\x0f\n\x07\x63ode_id\x18\x01 \x01(\t\x12\x0f\n\x07\x64\x61ta_id\x18\x02 \x01(\t\"0\n\rExecutionInfo\x12\x0f\n\x07\x65xec_id\x18\x01 \x01(\t\x12\x0e\n\x06status\x18\x02 \x01(\t\"\xb0\x01\n\x04Task\x12\x0f\n\x07\x63ode_id\x18\x01 \x01(\t\x12\x0c\n\x04type\x18\x02 \x01(\t\x12\x14\n\x0cinput_dir_id\x18\x03 \x01(\t\x12\x14\n\x0cinput_doc_id\x18\x04 \x01(\t\x12\x16\n\x0einput_chunk_id\x18\x05 \x01(\t\x12\x15\n\routput_dir_id\x18\x06 \x01(\t\x12\x15\n\routput_doc_id\x18\x07 \x01(\t\x12\x17\n\x0foutput_chunk_id\x18\x08 \x01(\t28\n\x0fMapReduceMaster\x12%\n\tSubmitJob\x12\x04.Job\x1a\x0e.ExecutionInfo\"\x00\x30\x01\x32\x35\n\x0fMapReduceWorker\x12\"\n\x07\x45xecute\x12\x05.Task\x1a\x0e.ExecutionInfo\"\x00\x62\x06proto3')
 )
 
 
@@ -117,36 +117,50 @@ _TASK = _descriptor.Descriptor(
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='chunk_id', full_name='Task.chunk_id', index=1,
+      name='type', full_name='Task.type', index=1,
       number=2, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='input_doc_id', full_name='Task.input_doc_id', index=2,
+      name='input_dir_id', full_name='Task.input_dir_id', index=2,
       number=3, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='type', full_name='Task.type', index=3,
+      name='input_doc_id', full_name='Task.input_doc_id', index=3,
       number=4, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='output_dir_id', full_name='Task.output_dir_id', index=4,
+      name='input_chunk_id', full_name='Task.input_chunk_id', index=4,
       number=5, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='output_doc_id', full_name='Task.output_doc_id', index=5,
+      name='output_dir_id', full_name='Task.output_dir_id', index=5,
       number=6, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='output_doc_id', full_name='Task.output_doc_id', index=6,
+      number=7, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      serialized_options=None, file=DESCRIPTOR),
+    _descriptor.FieldDescriptor(
+      name='output_chunk_id', full_name='Task.output_chunk_id', index=7,
+      number=8, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
@@ -163,8 +177,8 @@ _TASK = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=110,
-  serialized_end=233,
+  serialized_start=111,
+  serialized_end=287,
 )
 
 DESCRIPTOR.message_types_by_name['Job'] = _JOB
@@ -201,8 +215,8 @@ _MAPREDUCEMASTER = _descriptor.ServiceDescriptor(
   file=DESCRIPTOR,
   index=0,
   serialized_options=None,
-  serialized_start=235,
-  serialized_end=291,
+  serialized_start=289,
+  serialized_end=345,
   methods=[
   _descriptor.MethodDescriptor(
     name='SubmitJob',
@@ -225,8 +239,8 @@ _MAPREDUCEWORKER = _descriptor.ServiceDescriptor(
   file=DESCRIPTOR,
   index=1,
   serialized_options=None,
-  serialized_start=293,
-  serialized_end=346,
+  serialized_start=347,
+  serialized_end=400,
   methods=[
   _descriptor.MethodDescriptor(
     name='Execute',

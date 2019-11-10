@@ -22,7 +22,7 @@ class Listener(mapreduce_pb2_grpc.MapReduceWorkerServicer):
         self.kvstore = KeyValueStoreClient()
 
     def Execute(self, task, context):
-        print('execute request.', task.code_id, task.chunk_id, task.type)
+        print('execute request.', task.code_id, task.input_chunk_id, task.type)
         
         # download code and chunk
         workplace = os.path.join(INTERMEDIATE_OUTPUTS_DIR, task.output_doc_id)
@@ -31,16 +31,17 @@ class Listener(mapreduce_pb2_grpc.MapReduceWorkerServicer):
         try:
             sys.path.insert(1, workplace)
             py = __import__('task')
+            print(py)
         
             output = []
             if task.type == 'map':
-                chunk = self.kvstore.read_chunk(task.chunk_id).decode(KV_STORE_ENCODING)
+                chunk = self.kvstore.read_chunk(task.input_chunk_id).decode(KV_STORE_ENCODING)
                 for ch in py.mapper(task.input_doc_id, chunk):
                     output.append(ch)
                 
                 self.kvstore.upload_bytes(task.output_dir_id, task.output_doc_id, pickle.dumps(output))
             elif task.type == 'reduce':
-                chunk = pickle.loads(self.kvstore.read_bytes(task.output_dir_id, task.chunk_id))
+                chunk = pickle.loads(self.kvstore.read_bytes(task.input_dir_id, task.input_doc_id))
                 for ch in py.reducer(chunk):
                     output.append('{} {}'.format(ch[0], ch[1]))
                 

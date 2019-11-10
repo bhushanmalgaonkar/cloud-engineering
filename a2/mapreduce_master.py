@@ -56,11 +56,12 @@ class Listener(mapreduce_pb2_grpc.MapReduceMasterServicer):
             yield mapreduce_pb2.ExecutionInfo(exec_id = exec_id, status = '{}/{} map tasks finished'.format(idx, len(chunks)))
             
             # create new doc_id to store intermediate mapper output
-            doc_id = generateId()
-            mapper_outputs.append(doc_id)
-            task = mapreduce_pb2.Task(code_id=job.code_id, chunk_id=chunk[3], type='map', \
-                input_doc_id=chunk[1], output_dir_id=exec_id, output_doc_id=doc_id)
-            
+            mapper_output_doc_id = generateId()
+            mapper_outputs.append(mapper_output_doc_id)
+            task = mapreduce_pb2.Task(code_id=job.code_id, type='map', \
+                input_dir_id=exec_id, input_doc_id=chunk[1], input_chunk_id=chunk[3], \
+                output_dir_id=exec_id, output_doc_id=mapper_output_doc_id)
+
             # start task in thread
             wthread = threading.Thread(target=self.__execute_chunk, args=(worker, task, ), daemon=True)
             wthread.start()
@@ -88,8 +89,9 @@ class Listener(mapreduce_pb2_grpc.MapReduceMasterServicer):
 
         worker = self.__getworker()
         reducer_output_doc_id = 'output'
-        task = mapreduce_pb2.Task(code_id=job.code_id, chunk_id=shuffled_output_doc_id, type='reduce', \
-            input_doc_id='', output_dir_id=exec_id, output_doc_id=reducer_output_doc_id)
+        task = mapreduce_pb2.Task(code_id=job.code_id, type='reduce', \
+            input_dir_id=exec_id, input_doc_id=shuffled_output_doc_id, input_chunk_id='', \
+            output_dir_id=exec_id, output_doc_id=reducer_output_doc_id)
 
         # start task in thread
         wthread = threading.Thread(target=self.__execute_chunk, args=(worker, task, ), daemon=True)
