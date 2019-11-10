@@ -10,7 +10,7 @@ from concurrent import futures
 from uuid import uuid4
 
 import kvstore_pb2, kvstore_pb2_grpc
-from constants import KV_STORE_ROOT_DIR, KV_STORE_PORT
+from constants import KV_STORE_ROOT_DIR, KV_STORE_PORT, KV_STORE_BLOCK_SIZE
 
 class Listener(kvstore_pb2_grpc.KeyValueStoreServicer):
     def __init__(self, *args, **kwargs):
@@ -18,13 +18,13 @@ class Listener(kvstore_pb2_grpc.KeyValueStoreServicer):
             if not os.path.exists(KV_STORE_ROOT_DIR):
                 os.makedirs(KV_STORE_ROOT_DIR)
         except:
-            print('Error creating base director \'{}\'.'.format(KV_STORE_ROOT_DIR))
+            print('Error creating base directory \'{}\'.'.format(KV_STORE_ROOT_DIR))
             exit(1)
 
     def Save(self, data_block, context):
         try:
             blockfilename = os.path.join(KV_STORE_ROOT_DIR, data_block.key)
-            with open(blockfilename, 'w') as f:
+            with open(blockfilename, 'wb') as f:
                 f.write(data_block.value)
             return kvstore_pb2.SaveStatus(status = 'success')
         except:
@@ -33,11 +33,16 @@ class Listener(kvstore_pb2_grpc.KeyValueStoreServicer):
     def Get(self, id, context):
         try:
             blockfilename = os.path.join(KV_STORE_ROOT_DIR, id.id)
-            with open(blockfilename, 'r') as f:
-                data = ''.join(f.readlines())
-            return kvstore_pb2.DataBlock(key = id.id, value = data, error = False)
+            data = bytes()
+            with open(blockfilename, 'rb') as f:
+                while True:
+                    block = f.read(KV_STORE_BLOCK_SIZE)
+                    if not block:
+                        break
+                    data += block
+            return kvstore_pb2.DataBlock(key=id.id, value=data, error=False)
         except:
-            return kvstore_pb2.DataBlock(key = id.id, value = 'NULL', error = True)
+            return kvstore_pb2.DataBlock(key=id.id, value=bytes(), error=True)
             
 
 def run_server(port):

@@ -20,7 +20,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
   package='',
   syntax='proto3',
   serialized_options=None,
-  serialized_pb=_b('\n\rkvstore.proto\"\x10\n\x02Id\x12\n\n\x02id\x18\x01 \x01(\t\"6\n\tDataBlock\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t\x12\r\n\x05\x65rror\x18\x03 \x01(\x08\"\x1c\n\nSaveStatus\x12\x0e\n\x06status\x18\x01 \x01(\t2L\n\rKeyValueStore\x12!\n\x04Save\x12\n.DataBlock\x1a\x0b.SaveStatus\"\x00\x12\x18\n\x03Get\x12\x03.Id\x1a\n.DataBlock\"\x00\x62\x06proto3')
+  serialized_pb=_b('\n\rkvstore.proto\"\x10\n\x02Id\x12\n\n\x02id\x18\x01 \x01(\t\"6\n\tDataBlock\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\x0c\x12\r\n\x05\x65rror\x18\x03 \x01(\x08\"\x1c\n\nSaveStatus\x12\x0e\n\x06status\x18\x01 \x01(\t2L\n\rKeyValueStore\x12!\n\x04Save\x12\n.DataBlock\x1a\x0b.SaveStatus\"\x00\x12\x18\n\x03Get\x12\x03.Id\x1a\n.DataBlock\"\x00\x62\x06proto3')
 )
 
 
@@ -73,8 +73,8 @@ _DATABLOCK = _descriptor.Descriptor(
       serialized_options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
       name='value', full_name='DataBlock.value', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=_b("").decode('utf-8'),
+      number=2, type=12, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b(""),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       serialized_options=None, file=DESCRIPTOR),
