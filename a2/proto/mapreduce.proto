@@ -21,9 +21,11 @@ message ExecutionInfo {
 message Task {
     string code_id = 1;
     string chunk_id = 2;
-    string type = 3;   // map/reduce
+
+    string input_doc_id = 3;
+    string type = 4;   // map/reduce
 
     // where to store the result
-    string dir_id = 4;
-    string doc_id = 5;
+    string output_dir_id = 5;
+    string output_doc_id = 6;
 }

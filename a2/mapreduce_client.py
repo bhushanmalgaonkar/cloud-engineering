@@ -12,10 +12,11 @@ from constants import MAP_REDUCE_MASTER_HOST, MAP_REDUCE_MASTER_PORT
 def close(channel):
     channel.close()
 
-def submit_job(dir_data, dir_code):
+def submit_job(dir_data, dir_code, dir_output):
     try:
-        print('reading data from: ', dir_data)
-        print('reading code from: ', dir_code)
+        print('reading data from        : ', dir_data)
+        print('reading code from        : ', dir_code)
+        print('output will be saved at  : ', dir_output)
 
         # upload data and code to key-value store
         kv_store = KeyValueStoreClient()
@@ -31,9 +32,12 @@ def submit_job(dir_data, dir_code):
 
             exec_info = stub.SubmitJob(mapreduce_pb2.Job(code_id = code_id, data_id = data_id))
             for info in exec_info:
-                print(info.status)
+                print('master:', info.status)
 
             channel.unsubscribe(close)
+
+        # save output to dir_output
+        kv_store.download_file(info.exec_id, 'output', dir_output)
     except BaseException as e:
         print('mrclient: Failed submitting the job. Error: {}'.format(e))
         raise e
@@ -45,10 +49,13 @@ if __name__ == "__main__":
                         help='directory which contains all the input files')
     parser.add_argument('-c', '--code', type=str,
                         help='directory which contains code file')
+    parser.add_argument('-o', '--output', type=str,
+                        help='directory where final output will be stored')
     args = parser.parse_args()
     
     dir_data = args.data
     dir_code = args.code
+    dir_output = args.output
 
     if not dir_data or not os.path.exists(dir_data) or not os.path.isdir(dir_data):
         print('run {} -h for usage'.format(sys.argv[0]))
@@ -57,4 +64,4 @@ if __name__ == "__main__":
         print('run {} -h for usage'.format(sys.argv[0]))
         exit(1)
 
-    submit_job(dir_data, dir_code)
+    submit_job(dir_data, dir_code, dir_output)

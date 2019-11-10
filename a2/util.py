@@ -1,3 +1,4 @@
+import sys
 from datetime import datetime
 from uuid import uuid4
 
@@ -53,3 +54,19 @@ def str_iterator(string):
         
     if block_size > 0:
         yield (chunk_index, ''.join(block))
+
+# def dict_iterator(dictionary):
+#     block = {}
+#     block_size = 0
+#     chunk_index = 0
+#     for key in dictionary:
+#         block[key] = dictionary[key]
+#         block_size += sys.getsizeof(dictionary[key]) + sys.getsizeof(key)
+#         if block_size > KV_STORE_BLOCK_SIZE:
+#             yield (chunk_index, block)
+#             block = {}
+#             block_size = 0
+#             chunk_index += 1
+        
+#     if block_size > 0:
+#         yield (chunk_index, block)

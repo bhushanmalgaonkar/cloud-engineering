@@ -3,6 +3,7 @@
 import os
 import sys
 import grpc
+import pickle
 
 import kvstore_pb2, kvstore_pb2_grpc
 from constants import KV_STORE_HOST, KV_STORE_PORT, KV_STORE_DB_PATH, KV_STORE_ENCODING, KV_STORE_BLOCK_SIZE
@@ -24,6 +25,19 @@ class KeyValueStoreClient:
                 channel.unsubscribe(self.close)
         else:
             self.__uploadbytes(dir_id, doc_id, bytez, stub)
+
+    '''
+        Reads and returns the document as bytes() object
+    '''
+    def read_bytes(self, dir_id, doc_id, stub=None):
+        if not stub:
+            with grpc.insecure_channel("{}:{}".format(KV_STORE_HOST, KV_STORE_PORT)) as channel:
+                stub = kvstore_pb2_grpc.KeyValueStoreStub(channel)
+                bytez = self.__readbytes(dir_id, doc_id, stub)
+                channel.unsubscribe(self.close)
+        else:
+            bytez = self.__readbytes(dir_id, doc_id, stub)
+        return bytez
 
     '''
         Reads a text file and saves it in key-value store
@@ -143,8 +157,14 @@ class KeyValueStoreClient:
 
         # save to database
         self.db.save_chunk(dir_id, doc_id, chunk_index, chunk_id)
-        print('kvstore: saved {} {} {} {}'.format(dir_id, doc_id, chunk_index, chunk_id))
 
+    def __readbytes(self, dir_id, doc_id, stub):
+        chunks = self.get_chunk_metadata(dir_id, doc_id)
+        bytez = bytes()
+        for chunk in chunks:
+            data = self.__readchunk(chunk[3], stub)
+            bytez += data
+        return bytez
 
     def __uploadbytes(self, dir_id, doc_id, bytez, stub):
         for chunk_index, start in enumerate(range(0, len(bytez), KV_STORE_BLOCK_SIZE)):
@@ -166,7 +186,6 @@ class KeyValueStoreClient:
         # create an id to keep all files in the directory together on the server
         # all the files can be accessed using this id
         dir_id = generateId()
-        print('kvstore: dir_id: {}'.format(dir_id))
             
         # recursively upload all the files in the given directory
         for r, d, f in os.walk(dirpath):
@@ -207,3 +226,13 @@ if __name__ == "__main__":
     k = KeyValueStoreClient()
     dir_id = k.upload_directory(sys.argv[1])
     k.download_directory(dir_id, 'save_path', flatten=False)
+
+    # dir_id = generateId()
+    # doc_id = generateId()
+
+    # d = {'hi': [1, 2, 3], 'hello': [4, 5, 6]}
+    # k.upload_bytes(dir_id, doc_id, pickle.dumps(d))
+
+    # x = pickle.loads(k.read_bytes(dir_id, doc_id))
+    # print(x)
+    

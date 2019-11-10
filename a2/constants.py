@@ -13,5 +13,6 @@ MAP_REDUCE_MASTER_PORT = 9898
 INTERMEDIATE_OUTPUTS_DIR = 'intermediate_outputs'
 
 WORKERS = set([
+    ('localhost', 1200),
     ('localhost', 1201)
 ])
