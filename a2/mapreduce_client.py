@@ -52,6 +52,8 @@ def submit_job(dir_data, dir_code, dir_output):
 
 
 if __name__ == "__main__":
+    if not os.path.exists('logs') or not os.path.isdir('logs'):
+        os.makedirs('logs')
 
     level = log.DEBUG
     log.basicConfig(format='%(levelname)s: %(message)s',

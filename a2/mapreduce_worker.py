@@ -60,8 +60,7 @@ class Listener(mapreduce_pb2_grpc.MapReduceWorkerServicer):
             print(e)
             return mapreduce_pb2.ExecutionInfo(exec_id=task.output_dir_id, status='failed')
         finally:
-            # shutil.rmtree(workplace)
-            pass
+            shutil.rmtree(workplace)
             
 def run_server(port):
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=4))
