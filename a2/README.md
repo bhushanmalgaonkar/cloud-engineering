@@ -1,4 +1,5 @@
-
+## Key-Value store
+saving files as binary allows storing pickle dumps which is used for storing intermediate mapper outputs. If stored as text, it is not possible to determine the datatype of key and value in mapper output
 
 ## SQL tables
 1. **chunks**: stores location of a specific chunk of a file on the server
