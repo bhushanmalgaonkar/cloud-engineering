@@ -1,4 +1,7 @@
+## Key-Value store
+saving files as binary allows storing pickle dumps which is used for storing intermediate mapper outputs. If stored as text, it is not possible to determine the datatype of key and value in mapper output
 
+sqlalchemy used connection pooling to allow concurrent access. However in case of sqlite3, as it doesn't support concurrent access, sqlachemy will allow on one connection to write to database at a time, as long as all the connection originate from same process. To achieve concurrency in multiprocess setup, we can use a database that supports concurrency e.g. MySQL. The code will work without any changes.
 
 ## SQL tables
 1. **chunks**: stores location of a specific chunk of a file on the server
