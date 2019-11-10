@@ -12,7 +12,9 @@ MAP_REDUCE_MASTER_PORT = 9898
 
 INTERMEDIATE_OUTPUTS_DIR = 'intermediate_outputs'
 
-WORKERS = set([
+WORKERS = list(set([
     ('localhost', 1200),
-    ('localhost', 1201)
-])
+    ('localhost', 1201),
+    ('localhost', 1202)
+]))
+TASKS_PER_WORKER = 2

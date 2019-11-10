@@ -5,9 +5,10 @@ import sys
 import grpc
 import shutil
 import pickle
+import time
 import argparse
-import tempfile
 from concurrent import futures
+from random import random
 
 import mapreduce_pb2, mapreduce_pb2_grpc
 import kvstore_pb2, kvstore_pb2_grpc
@@ -28,11 +29,14 @@ class Listener(mapreduce_pb2_grpc.MapReduceWorkerServicer):
         workplace = os.path.join(INTERMEDIATE_OUTPUTS_DIR, task.output_doc_id)
         self.kvstore.download_directory(task.code_id, workplace, flatten=True)
 
+        module_name = generateId()
+        os.rename(os.path.join(workplace, 'task.py'), os.path.join(workplace, module_name + '.py'))
+
         try:
             sys.path.insert(1, workplace)
-            py = __import__('task')
+            py = __import__(module_name)
             print(py)
-        
+
             output = []
             if task.type == 'map':
                 chunk = self.kvstore.read_chunk(task.input_chunk_id).decode(KV_STORE_ENCODING)
@@ -58,7 +62,7 @@ class Listener(mapreduce_pb2_grpc.MapReduceWorkerServicer):
         finally:
             # shutil.rmtree(workplace)
             pass
-
+            
 def run_server(port):
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=4))
     mapreduce_pb2_grpc.add_MapReduceWorkerServicer_to_server(Listener(), server)
