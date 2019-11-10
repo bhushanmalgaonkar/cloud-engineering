@@ -111,11 +111,9 @@ class KeyValueStoreClient:
         if not stub:
             with grpc.insecure_channel("{}:{}".format(KV_STORE_HOST, KV_STORE_PORT)) as channel:
                 stub = kvstore_pb2_grpc.KeyValueStoreStub(channel)
-                self.__readchunk(chunk_id, stub)
+                return self.__readchunk(chunk_id, stub)
         else:
-            self.__readchunk(chunk_id, stub)
-
-
+            return self.__readchunk(chunk_id, stub)
         
     '''
         Returns all unique doc_ids associated with directory 
