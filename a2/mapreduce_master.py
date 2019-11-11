@@ -163,7 +163,14 @@ class Listener(mapreduce_pb2_grpc.MapReduceMasterServicer):
                 time.sleep(0.2)
         return worker
 
-def run_server(port):
+def run_mapreduce_master(port=MAP_REDUCE_MASTER_PORT):
+    if not os.path.exists('logs') or not os.path.isdir('logs'):
+        os.makedirs('logs')
+
+    level = log.DEBUG
+    log.basicConfig(format='%(levelname)s: %(message)s',
+                        level=level, filename='logs/master-{}.log'.format(port))
+
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=1))
     mapreduce_pb2_grpc.add_MapReduceMasterServicer_to_server(Listener(), server)
     server.add_insecure_port("[::]:{}".format(port))
@@ -174,7 +181,8 @@ def run_server(port):
         try:
             time.sleep(5)
         except KeyboardInterrupt:
-            print("KeyboardInterrupt")
+            print("KeyboardInterrupt on master:{}".format(port))
+            log.info('KeyboardInterrupt')
             server.stop(0)
             break
         except:
@@ -182,10 +190,4 @@ def run_server(port):
 
 
 if __name__ == "__main__":
-    if not os.path.exists('logs') or not os.path.isdir('logs'):
-        os.makedirs('logs')
-
-    level = log.DEBUG
-    log.basicConfig(format='%(levelname)s: %(message)s',
-                        level=level, filename='logs/master.log')
-    run_server(MAP_REDUCE_MASTER_PORT)
+    run_mapreduce_master()

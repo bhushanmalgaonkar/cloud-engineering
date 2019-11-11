@@ -3,6 +3,7 @@
 import os
 import time
 import threading
+import logging as log
 from datetime import datetime
 
 import grpc
@@ -22,6 +23,7 @@ class Listener(kvstore_pb2_grpc.KeyValueStoreServicer):
             exit(1)
 
     def Save(self, data_block, context):
+        log.debug('save:{}'.format(data_block.key))
         try:
             blockfilename = os.path.join(KV_STORE_ROOT_DIR, data_block.key)
             with open(blockfilename, 'wb') as f:
@@ -31,6 +33,7 @@ class Listener(kvstore_pb2_grpc.KeyValueStoreServicer):
             return kvstore_pb2.SaveStatus(status = 'failed')
 
     def Get(self, id, context):
+        log.debug('get :{}'.format(id.id))
         try:
             blockfilename = os.path.join(KV_STORE_ROOT_DIR, id.id)
             data = bytes()
@@ -45,7 +48,14 @@ class Listener(kvstore_pb2_grpc.KeyValueStoreServicer):
             return kvstore_pb2.DataBlock(key=id.id, value=bytes(), error=True)
             
 
-def run_server(port):
+def run_kvstore_server(port=KV_STORE_PORT):
+    if not os.path.exists('logs') or not os.path.isdir('logs'):
+        os.makedirs('logs')
+
+    level = log.DEBUG
+    log.basicConfig(format='%(levelname)s: %(message)s',
+                        level=level, filename='logs/kvstore-{}.log'.format(port))
+
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=4))
     kvstore_pb2_grpc.add_KeyValueStoreServicer_to_server(Listener(), server)
     server.add_insecure_port("[::]:{}".format(port))
@@ -55,11 +65,12 @@ def run_server(port):
         try:
             time.sleep(5)
         except KeyboardInterrupt:
-            print("KeyboardInterrupt")
+            print("KeyboardInterrupt on kvstore:{}".format(port))
+            log.info('KeyboardInterrupt')
             server.stop(0)
             break
         except:
             pass
 
 if __name__ == "__main__":
-    run_server(KV_STORE_PORT)
+    run_kvstore_server()

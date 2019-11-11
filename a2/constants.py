@@ -15,6 +15,7 @@ INTERMEDIATE_OUTPUTS_DIR = 'intermediate_outputs'
 WORKERS = list(set([
     ('localhost', 1200),
     ('localhost', 1201),
-    ('localhost', 1202)
+    ('localhost', 1202),
+    ('localhost', 1203)
 ]))
 TASKS_PER_WORKER = 2

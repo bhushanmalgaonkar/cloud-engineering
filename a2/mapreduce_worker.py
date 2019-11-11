@@ -7,12 +7,14 @@ import shutil
 import pickle
 import time
 import argparse
+import logging as log
 from concurrent import futures
 from random import random
 
 import mapreduce_pb2, mapreduce_pb2_grpc
 import kvstore_pb2, kvstore_pb2_grpc
 from constants import KV_STORE_DB_PATH, KV_STORE_HOST, KV_STORE_PORT, KV_STORE_ENCODING, INTERMEDIATE_OUTPUTS_DIR
+from constants import TASKS_PER_WORKER
 from database_handler import DataBaseHandler
 from kvstore_client import KeyValueStoreClient
 from util import generateId
@@ -23,7 +25,8 @@ class Listener(mapreduce_pb2_grpc.MapReduceWorkerServicer):
         self.kvstore = KeyValueStoreClient()
 
     def Execute(self, task, context):
-        print('execute request.', task.code_id, task.input_chunk_id, task.type)
+        print('execute request. code_id:{}, chunk_id:{}, type:{}'.format(task.code_id, task.input_chunk_id, task.type))
+        log.info('execute request. code_id:{}, chunk_id:{}, type:{}'.format(task.code_id, task.input_chunk_id, task.type))
         
         # download code and chunk
         workplace = os.path.join(INTERMEDIATE_OUTPUTS_DIR, task.output_doc_id)
@@ -35,7 +38,6 @@ class Listener(mapreduce_pb2_grpc.MapReduceWorkerServicer):
         try:
             sys.path.insert(1, workplace)
             py = __import__(module_name)
-            print(py)
 
             output = []
             if task.type == 'map':
@@ -55,15 +57,24 @@ class Listener(mapreduce_pb2_grpc.MapReduceWorkerServicer):
                 raise 'unknown operation'
 
             print('success')
+            log.info('success')
             return mapreduce_pb2.ExecutionInfo(exec_id=task.output_dir_id, status='success')
         except BaseException as e:
             print(e)
+            log.info('task failed {}'.format(e))
             return mapreduce_pb2.ExecutionInfo(exec_id=task.output_dir_id, status='failed')
         finally:
             shutil.rmtree(workplace)
             
-def run_server(port):
-    server = grpc.server(futures.ThreadPoolExecutor(max_workers=4))
+def run_mapreduce_worker(port):
+    if not os.path.exists('logs') or not os.path.isdir('logs'):
+        os.makedirs('logs')
+
+    level = log.DEBUG
+    log.basicConfig(format='%(levelname)s: %(message)s',
+                        level=level, filename='logs/worker-{}.log'.format(port))
+
+    server = grpc.server(futures.ThreadPoolExecutor(max_workers=TASKS_PER_WORKER))
     mapreduce_pb2_grpc.add_MapReduceWorkerServicer_to_server(Listener(), server)
     server.add_insecure_port("[::]:{}".format(port))
     server.start()
@@ -73,7 +84,8 @@ def run_server(port):
         try:
             time.sleep(5)
         except KeyboardInterrupt:
-            print("KeyboardInterrupt")
+            print("KeyboardInterrupt on worker:{}".format(port))
+            log.info('KeyboardInterrupt')
             server.stop(0)
             break
         except:
@@ -84,4 +96,4 @@ if __name__ == "__main__":
     parser.add_argument('-p', '--port', type=int,
                         help='start worker on port <port>')
     args = parser.parse_args()
-    run_server(args.port)
+    run_mapreduce_worker(args.port)
