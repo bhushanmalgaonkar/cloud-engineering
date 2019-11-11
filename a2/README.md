@@ -51,10 +51,12 @@ A worker is invoked by master to process single chunk of data. The worker gets t
 Provides two gRPC methods.
     1. Save(key, value)
     2. Get(key)
+    
 The values are stored on local disk with key as filename and value as data. Files are saved as binary. Saving files as binary allows storing pickle dumps which is used for storing intermediate mapper outputs since the outputs can be of any type. If stored as text, it is not possible to determine the datatype of key and value while recovering mapper output.
 
 ### KeyValueStoreClient
 Provides methods to store/retrieve files/directories in key-value store. It reads and divides the files into chunks of fixed size (constants.BLOCK_SIZE), assigns each chunk an unique id and saves it the KeyValueStore. 
+
 Since KeyValueStore is minimal and doesn't provide any notion of files and directories, the KeyValueStoreClient maps an hierarchy of keys to unique id of the chunk. It saves the mapping in the database for efficient lookup. See **chunks** table below.
 
 ## Database
