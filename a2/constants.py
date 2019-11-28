@@ -2,7 +2,7 @@
 
 KV_STORE_HOST = 'localhost'
 KV_STORE_PORT = 7894
-KV_STORE_DB_PATH = 'kvstore.db'
+KV_STORE_DB_PATH = 'mysql+pymysql://root:P@ssword123@127.0.0.1:3306/kvstore'
 KV_STORE_ROOT_DIR = 'chunks'
 KV_STORE_BLOCK_SIZE = 1024 * 1024
 KV_STORE_ENCODING = 'utf-8'

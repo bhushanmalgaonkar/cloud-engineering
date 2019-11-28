@@ -76,7 +76,7 @@ def run_mapreduce_worker(port):
 
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=TASKS_PER_WORKER))
     mapreduce_pb2_grpc.add_MapReduceWorkerServicer_to_server(Listener(), server)
-    server.add_insecure_port("[::]:{}".format(port))
+    server.add_insecure_port("0.0.0.0:{}".format(port))
     server.start()
     print('MapReduce worker listening on port {}'.format(port))
 

@@ -173,7 +173,7 @@ def run_mapreduce_master(port=MAP_REDUCE_MASTER_PORT):
 
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=1))
     mapreduce_pb2_grpc.add_MapReduceMasterServicer_to_server(Listener(), server)
-    server.add_insecure_port("[::]:{}".format(port))
+    server.add_insecure_port("0.0.0.0:{}".format(port))
     server.start()
     print('MapReduce server listening on port {}'.format(port))
 

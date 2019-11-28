@@ -5,13 +5,13 @@ from sqlalchemy.pool import QueuePool
 
 class DataBaseHandler:
     def __init__(self, path):
-        self.engine = db.create_engine('sqlite:///{}'.format(path))
+        self.engine = db.create_engine(path)
         conn = self.engine.connect()        
         conn.execute(""" CREATE TABLE IF NOT EXISTS chunks (
-                        dir_id text NOT NULL,
-                        doc_id text NOT NULL,
+                        dir_id VARCHAR(50) NOT NULL,
+                        doc_id VARCHAR(50) NOT NULL,
                         chunk_index int NOT NULL,
-                        chunk_id text PRIMARY KEY
+                        chunk_id VARCHAR(50) PRIMARY KEY
                     ); """)
 
         '''
@@ -25,22 +25,22 @@ class DataBaseHandler:
                 2. collect output of reducer to answer user query
         '''
         conn.execute(""" CREATE TABLE IF NOT EXISTS executions (
-                        exec_id text NOT NULL,
-                        exec_type text NOT NULL,
-                        chunk_id text NOT NULL,
-                        status text NOT NULL,
-                        result_dir_id text
+                        exec_id VARCHAR(50) NOT NULL,
+                        exec_type VARCHAR(50) NOT NULL,
+                        chunk_id VARCHAR(50) NOT NULL,
+                        status VARCHAR(50) NOT NULL,
+                        result_dir_id VARCHAR(50)
                     ); """)
 
         '''
             stores execution status and result of entire map-reduce job
         '''
         conn.execute(""" CREATE TABLE IF NOT EXISTS jobs (
-                        exec_id text NOT NULL,
-                        code_id text NOT NULL,
-                        dir_id text NOT NULL,
-                        status text NOT NULL,
-                        result_dir_id text NOT NULL
+                        exec_id VARCHAR(50) NOT NULL,
+                        code_id VARCHAR(50) NOT NULL,
+                        dir_id VARCHAR(50) NOT NULL,
+                        status VARCHAR(50) NOT NULL,
+                        result_dir_id VARCHAR(50) NOT NULL
                     ); """)
 
         # metadata = db.MetaData()
@@ -54,7 +54,8 @@ class DataBaseHandler:
         try:
             conn.execute(sql, params)
             trans.commit()
-        except:
+        except BaseException as e:
+            print(e)
             trans.rollback()
         conn.close()
 
@@ -66,22 +67,23 @@ class DataBaseHandler:
 
     def save_chunk(self, dir_id, doc_id, chunk_index, chunk_id):
         self.execute(""" INSERT INTO chunks (dir_id, doc_id, chunk_index, chunk_id)
-                                VALUES (?, ?, ?, ?) """, (dir_id, doc_id, chunk_index, chunk_id))
+                                VALUES (%s, %s, %s, %s) """, (dir_id, doc_id, chunk_index, chunk_id))
 
     def get_chunk_metadata(self, dir_id, doc_id=None):
         if doc_id:
             rs = self.execute_and_return(""" SELECT dir_id, doc_id, chunk_index, chunk_id
                                 FROM chunks
-                                WHERE dir_id = ? AND doc_id = ? 
+                                WHERE dir_id = %s AND doc_id = %s 
                                 ORDER BY doc_id, chunk_index """, (dir_id, doc_id))
         else:
             rs = self.execute_and_return(""" SELECT dir_id, doc_id, chunk_index, chunk_id
                                 FROM chunks
-                                WHERE dir_id = ?
+                                WHERE dir_id = %s
                                 ORDER BY doc_id, chunk_index """, (dir_id))
         return rs
 
     def get_doc_metadata(self, dir_id):
         return self.execute_and_return(""" SELECT DISTINCT doc_id
                                 FROM chunks
-                                WHERE dir_id = ? """, (dir_id))
+                                WHERE dir_id = %s """, (dir_id))
+

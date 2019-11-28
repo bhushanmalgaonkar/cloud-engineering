@@ -58,7 +58,7 @@ def run_kvstore_server(port=KV_STORE_PORT):
 
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=4))
     kvstore_pb2_grpc.add_KeyValueStoreServicer_to_server(Listener(), server)
-    server.add_insecure_port("[::]:{}".format(port))
+    server.add_insecure_port("0.0.0.0:{}".format(port))
     server.start()
     print('KeyValueStore server listening on port {}'.format(port))
     while True:

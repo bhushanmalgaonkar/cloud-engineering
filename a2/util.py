@@ -70,3 +70,4 @@ def str_iterator(string):
         
 #     if block_size > 0:
 #         yield (chunk_index, block)
+
