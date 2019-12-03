@@ -7,9 +7,7 @@ key_value_store="key-value-store"
 mysql_password="P@ssword123"
 database_name="kvstore"
 
-: '
-
-echo -e "\n\n***Creating instance for MapReduceMaster"
+echo -e "***Creating instance for MapReduceMaster"
 gcloud compute instances create $map_reduce_master --zone $zone 
 
 echo -e "\n\n***Wait for VM to open SSH port"
@@ -78,11 +76,10 @@ while true; do
     fi
     sleep 1
 done
-'
 
-key_value_store_ip='34.66.187.52'
 echo -e "\n\n***Starting MapReduceMaster server"
 gcloud compute ssh $map_reduce_master --command "sudo sed -i 's/^KV_STORE_HOST.*/KV_STORE_HOST = ${key_value_store_ip}/' ~/a2/constants.py; ~/a2/mapreduce_master.py > mapreduce_master_stdout &" --zone $zone 
 
+echo -e "\n\n***KeyValueStore ip ${key_value_store_ip}"
 echo -e "\n\n***MapReduceMaster ip ${map_reduce_master_ip}"
 
