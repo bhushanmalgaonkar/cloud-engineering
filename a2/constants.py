@@ -2,7 +2,7 @@
 
 KV_STORE_HOST = '34.66.187.52'
 KV_STORE_PORT = 7894
-KV_STORE_DB_PATH = f'mysql+pymysql://root:P@ssword123@{KV_STORE_HOST}:3306/kvstore'
+KV_STORE_DB_PATH = 'mysql+pymysql://root:P@ssword123@{}:3306/kvstore'.format(KV_STORE_HOST)
 KV_STORE_ROOT_DIR = 'chunks'
 KV_STORE_BLOCK_SIZE = 1024 * 1024
 KV_STORE_ENCODING = 'utf-8'

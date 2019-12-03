@@ -10,14 +10,14 @@ GCLOUD_ZONE = 'us-central1-c'
 compute = build('compute', 'v1')
 
 def create_worker_boot_disk(disk_name, wait=False):
-    print(f"Creating worker boot disk {disk_name}")
+    print("Creating worker boot disk {}".format(disk_name))
 
     disk_body = {
-        "name": f"{disk_name}",
-        "sourceSnapshot": f"projects/{GCLOUD_PROJECT}/global/snapshots/test-image",
+        "name": disk_name,
+        "sourceSnapshot": "projects/{}/global/snapshots/test-image".format(GCLOUD_PROJECT),
         "sizeGb": "10",
-        "type": f"projects/{GCLOUD_PROJECT}/zones/{GCLOUD_ZONE}/diskTypes/pd-standard",
-        "zone": f"projects/{GCLOUD_PROJECT}/zones/{GCLOUD_ZONE}"
+        "type": "projects/{}/zones/{}/diskTypes/pd-standard".format(GCLOUD_PROJECT, GCLOUD_ZONE),
+        "zone": "projects/{}/zones/{}".format(GCLOUD_PROJECT, GCLOUD_ZONE)
     }
 
     response = compute.disks().insert(project=GCLOUD_PROJECT, zone=GCLOUD_ZONE, body=disk_body).execute()
@@ -26,7 +26,7 @@ def create_worker_boot_disk(disk_name, wait=False):
     return response
 
 def delete_disk(disk_name, wait=False):
-    print(f"Deleting worker boot disk {disk_name}")
+    print("Deleting disk {}".format(disk_name))
 
     response = compute.disks().delete(project=GCLOUD_PROJECT, zone=GCLOUD_ZONE, disk=disk_name).execute()
     if wait:
@@ -34,7 +34,7 @@ def delete_disk(disk_name, wait=False):
     return response
 
 def create_worker_instance(instance_name, disk_name=None, wait=False):
-    print(f"Creating worker instance {instance_name}")
+    print("Creating worker instance {}".format(disk_name))
 
     if not disk_name:
         disk_name = instance_name
@@ -42,9 +42,9 @@ def create_worker_instance(instance_name, disk_name=None, wait=False):
 
     instance_body = {
         "kind": "compute#instance",
-        "name": f"{instance_name}",
-        "zone": f"projects/{GCLOUD_PROJECT}/zones/{GCLOUD_ZONE}",
-        "machineType": f"projects/{GCLOUD_PROJECT}/zones/{GCLOUD_ZONE}/machineTypes/n1-standard-1",
+        "name": instance_name,
+        "zone": "projects/{}/zones/{}".format(GCLOUD_PROJECT, GCLOUD_ZONE),
+        "machineType": "projects/{}/zones/{}/machineTypes/n1-standard-1".format(GCLOUD_PROJECT, GCLOUD_ZONE),
         "displayDevice": {
             "enableDisplay": False
         },
@@ -55,16 +55,15 @@ def create_worker_instance(instance_name, disk_name=None, wait=False):
             "boot": True,
             "mode": "READ_WRITE",
             "autoDelete": True,
-            "deviceName": f"{instance_name}",
-            "source": f"projects/{GCLOUD_PROJECT}/zones/{GCLOUD_ZONE}/disks/{disk_name}",
-            "diskEncryptionKey": {}
+            "deviceName": instance_name,
+            "source": "projects/{}/zones/{}/disks/{}".format(GCLOUD_PROJECT, GCLOUD_ZONE, disk_name)
             }
         ],
         "canIpForward": False,
         "networkInterfaces": [
             {
             "kind": "compute#networkInterface",
-            "subnetwork": f"projects/{GCLOUD_PROJECT}/regions/{GCLOUD_REGION}/subnetworks/default",
+            "subnetwork": "projects/{}/regions/{}/subnetworks/default".format(GCLOUD_PROJECT, GCLOUD_REGION,
             "accessConfigs": [
                 {
                 "kind": "compute#accessConfig",
@@ -106,7 +105,7 @@ def create_worker_instance(instance_name, disk_name=None, wait=False):
     return response
 
 def start_instance(instance_name, wait=False):
-    print(f"Stopping instance {instance_name}")
+    print("Stopping instance {}".format(instance_name))
 
     response = compute.instances().start(project=GCLOUD_PROJECT, zone=GCLOUD_ZONE, instance=instance_name).execute()
     if wait:
@@ -114,7 +113,7 @@ def start_instance(instance_name, wait=False):
     return response
 
 def stop_instance(instance_name, wait=False):
-    print(f"Stopping instance {instance_name}")
+    print("Stopping instance {}".format(instance_name))
     
     try:
         response = compute.instances().stop(project=GCLOUD_PROJECT, zone=GCLOUD_ZONE, instance=instance_name).execute()
@@ -126,7 +125,7 @@ def stop_instance(instance_name, wait=False):
             raise e
 
 def delete_instance(instance_name, wait=False):
-    print(f"Deleting instance {instance_name}")
+    print("Deleting instance {}".format(instance_name))
 
     try:
         response = compute.instances().delete(project=GCLOUD_PROJECT, zone=GCLOUD_ZONE, instance=instance_name).execute()
@@ -151,19 +150,19 @@ def get_instance_ip(instance_name):
 
 
 def wait_for_operation(operation):
-    print(f"Waiting for operation")
+    print("Waiting for operation")
     
     itrs = 0
     while True:
         result = compute.zoneOperations().get(project=GCLOUD_PROJECT, zone=GCLOUD_ZONE, operation=operation['name']).execute()
 
         if result['status'] == 'DONE':
-            print(f"Done{' ' * 10}")
+            print("Done{}".format(' ' * 10))
             if 'error' in result:
                 raise Exception(result['error'])
             return result
 
-        print(f"{result['status']}{'.' * itrs}{' ' * (3 - itrs)}", end="\r")
+        print("{}{}{}".format(result['status'], '.' * itrs, ' ' * (3 - itrs)), end="\r")
         itrs = (itrs + 1) % 3
 
         time.sleep(1)

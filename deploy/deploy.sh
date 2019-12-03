@@ -62,7 +62,7 @@ gcloud compute ssh $key_value_store --command "sudo mysql -u root -e \"${create_
 
 
 echo -e "\n\n***Starting KeyValueStore server"
-gcloud compute ssh $key_value_store --command "~/a2/kvstore_server.py > kvstore_server_stdout &" --zone $zone
+gcloud compute ssh $key_value_store --command "python3 ~/a2/kvstore_server.py > kvstore_server_stdout &" --zone $zone
 
 echo -e "\n\n***Restarting MapReduceMaster VM"
 gcloud compute instances start $map_reduce_master --zone $zone
@@ -78,7 +78,7 @@ while true; do
 done
 
 echo -e "\n\n***Starting MapReduceMaster server"
-gcloud compute ssh $map_reduce_master --command "sudo sed -i 's/^KV_STORE_HOST.*/KV_STORE_HOST = ${key_value_store_ip}/' ~/a2/constants.py; ~/a2/mapreduce_master.py > mapreduce_master_stdout &" --zone $zone 
+gcloud compute ssh $map_reduce_master --command "sudo sed -i 's/^KV_STORE_HOST.*/KV_STORE_HOST = \'${key_value_store_ip}\'/' ~/a2/constants.py; python3 ~/a2/mapreduce_master.py > mapreduce_master_stdout &" --zone $zone 
 
 echo -e "\n\n***KeyValueStore ip ${key_value_store_ip}"
 echo -e "\n\n***MapReduceMaster ip ${map_reduce_master_ip}"
