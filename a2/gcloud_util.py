@@ -63,7 +63,7 @@ def create_worker_instance(instance_name, disk_name=None, wait=False):
         "networkInterfaces": [
             {
             "kind": "compute#networkInterface",
-            "subnetwork": "projects/{}/regions/{}/subnetworks/default".format(GCLOUD_PROJECT, GCLOUD_REGION,
+            "subnetwork": "projects/{}/regions/{}/subnetworks/default".format(GCLOUD_PROJECT, GCLOUD_REGION),
             "accessConfigs": [
                 {
                 "kind": "compute#accessConfig",
