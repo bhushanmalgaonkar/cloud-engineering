@@ -87,6 +87,8 @@ class DataBaseHandler:
                                 FROM chunks
                                 WHERE dir_id = %s """, (dir_id))
 
+
+from constants import KV_STORE_DB_PATH
 if __name__ == "__main__":
-    db = DataBaseHandler('mysql+pymysql://root:P@ssword123@35.202.18.136:3306/kvstore')
+    db = DataBaseHandler(KV_STORE_DB_PATH)
     db.save_chunk('dir_id', 'doc_id', 0, 'chunk_id')

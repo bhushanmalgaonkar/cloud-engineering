@@ -225,7 +225,7 @@ class KeyValueStoreClient:
 if __name__ == "__main__":
     k = KeyValueStoreClient()
     dir_id = k.upload_directory(sys.argv[1])
-    k.download_directory('20b9e2be-b2e0-4ae6-a92e-e6e39e68e347-191110-145411', 'save_path', flatten=False)
+    k.download_directory(dir_id, 'hi there')
 
     # s = k.read_bytes('1d140d8f-1918-4ae3-b0da-fefb3fec7fb0-191110-150149', 'd4299dba-7530-4f19-bb06-463aacf5bdd2-191110-150152')
     # print(pickle.loads(s))
