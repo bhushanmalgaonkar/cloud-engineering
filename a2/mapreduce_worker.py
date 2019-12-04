@@ -15,13 +15,14 @@ import mapreduce_pb2, mapreduce_pb2_grpc
 import kvstore_pb2, kvstore_pb2_grpc
 from constants import KV_STORE_DB_PATH, KV_STORE_HOST, KV_STORE_PORT, KV_STORE_ENCODING, INTERMEDIATE_OUTPUTS_DIR
 from constants import TASKS_PER_WORKER
-from database_handler import DataBaseHandler
 from kvstore_client import KeyValueStoreClient
 from util import generateId
+from resource_manager import ResourceManager
 
 class Listener(mapreduce_pb2_grpc.MapReduceWorkerServicer):
     def __init__(self, *args, **kwargs):
-        self.db = DataBaseHandler(KV_STORE_DB_PATH)
+        self.rm = ResourceManager()
+        self.rm.find_kvstore()
         self.kvstore = KeyValueStoreClient()
 
     def Execute(self, task, context):
@@ -53,14 +54,11 @@ class Listener(mapreduce_pb2_grpc.MapReduceWorkerServicer):
                 
                 self.kvstore.upload_file_str(task.output_dir_id, task.output_doc_id, '\n'.join(output))
             else:
-                print('unknown operation')
                 raise 'unknown operation'
 
-            print('success')
             log.info('success')
             return mapreduce_pb2.ExecutionInfo(exec_id=task.output_dir_id, status='success')
         except BaseException as e:
-            print(e)
             log.info('task failed {}'.format(e))
             return mapreduce_pb2.ExecutionInfo(exec_id=task.output_dir_id, status='failed')
         finally:

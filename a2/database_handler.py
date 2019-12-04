@@ -86,9 +86,3 @@ class DataBaseHandler:
         return self.execute_and_return(""" SELECT DISTINCT doc_id
                                 FROM chunks
                                 WHERE dir_id = %s """, (dir_id))
-
-
-from constants import KV_STORE_DB_PATH
-if __name__ == "__main__":
-    db = DataBaseHandler(KV_STORE_DB_PATH)
-    db.save_chunk('dir_id', 'doc_id', 0, 'chunk_id')

@@ -1,11 +1,17 @@
+#!/usr/bin/python3
+
 import time
 
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
+from constants import MAP_REDUCE_WORKER_PORT
+
 GCLOUD_PROJECT = 'bhushan-malgaonkar'
 GCLOUD_REGION = 'us-central1'
 GCLOUD_ZONE = 'us-central1-c'
+
+WORKER_DISK_NAME = 'base-snapshot'
 
 compute = build('compute', 'v1')
 
@@ -14,7 +20,7 @@ def create_worker_boot_disk(disk_name, wait=False):
 
     disk_body = {
         "name": disk_name,
-        "sourceSnapshot": "projects/{}/global/snapshots/test-image".format(GCLOUD_PROJECT),
+        "sourceSnapshot": "projects/{}/global/snapshots/{}".format(GCLOUD_PROJECT, WORKER_DISK_NAME),
         "sizeGb": "10",
         "type": "projects/{}/zones/{}/diskTypes/pd-standard".format(GCLOUD_PROJECT, GCLOUD_ZONE),
         "zone": "projects/{}/zones/{}".format(GCLOUD_PROJECT, GCLOUD_ZONE)
@@ -48,6 +54,14 @@ def create_worker_instance(instance_name, disk_name=None, wait=False):
         "displayDevice": {
             "enableDisplay": False
         },
+        "metadata": {
+            "items": [
+                {
+                "key": "startup-script",
+                "value": "#!/bin/bash\npython3 ~/a2/mapreduce_worker.py -p {}".format(MAP_REDUCE_WORKER_PORT)
+                }
+            ]
+        },
         "disks": [
             {
             "kind": "compute#attachedDisk",
@@ -75,6 +89,9 @@ def create_worker_instance(instance_name, disk_name=None, wait=False):
             "aliasIpRanges": []
             }
         ],
+        "labels": {
+            "type": "map-reduce-worker"
+        },
         "scheduling": {
             "preemptible": False,
             "onHostMaintenance": "MIGRATE",
@@ -136,6 +153,19 @@ def delete_instance(instance_name, wait=False):
         if e.args[0]['status'] != '404':
             raise e
 
+def list_instances():
+    print("Listing instances")
+    response = compute.instances().list(project=GCLOUD_PROJECT, zone=GCLOUD_ZONE).execute()
+
+    instances = {}
+    for instance in response['items']:
+        instances[instance['name']] = {
+                'type': instance['labels']['type'] if 'labels' in instance else '', 
+                'status': instance['status'] if 'status' in instance else '', 
+                'ip': instance['networkInterfaces'][0]['accessConfigs'][0]['natIP'] if instance['status'] == 'RUNNING' else ''
+            }
+    return instances
+
 from pprint import pprint
 def get_instance_ip(instance_name):
     result = compute.instances().list(project=GCLOUD_PROJECT, zone=GCLOUD_ZONE).execute()
@@ -166,3 +196,6 @@ def wait_for_operation(operation):
         itrs = (itrs + 1) % 3
 
         time.sleep(1)
+
+if __name__ == "__main__":
+    print(list_instances())

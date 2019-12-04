@@ -10,20 +10,16 @@ from queue import Queue
 from random import shuffle
 from concurrent import futures
 
+from resource_manager import ResourceManager
 import mapreduce_pb2, mapreduce_pb2_grpc
 import kvstore_pb2, kvstore_pb2_grpc
 from constants import MAP_REDUCE_MASTER_PORT, KV_STORE_DB_PATH
 from constants import WORKERS, TASKS_PER_WORKER
 from kvstore_client import KeyValueStoreClient
 from util import generateId
-
-worker_list = WORKERS * TASKS_PER_WORKER
-shuffle(worker_list)
+from gcloud_util import *
 
 workers = Queue()
-for worker in worker_list:
-    workers.put(worker)
-
 workers_mutex = threading.Lock()
 
 def task_str(task):
@@ -37,25 +33,13 @@ def worker_str(worker):
 
 class Listener(mapreduce_pb2_grpc.MapReduceMasterServicer):
     def __init__(self, *args, **kwargs):
+        self.rm = ResourceManager()
+        self.rm.find_kvstore()
         self.kvstore = KeyValueStoreClient()
 
-    def __execute_chunk(self, worker, task):
-        try:
-            # assign chunk to worker
-            with grpc.insecure_channel("{}:{}".format(worker[0], worker[1])) as channel:
-                stub = mapreduce_pb2_grpc.MapReduceWorkerStub(channel)
-                log.debug('Completed ' + task_str(task))
-                return stub.Execute(task)
-        except BaseException as e:
-            print(e)
-            log.error('Error executing ' + task_str(task) + ', ' + str(e))
-        finally:
-            # return the work to the pool
-            workers_mutex.acquire()
-            workers.put(worker)
-            workers_mutex.release()
-
     def SubmitJob(self, job, context):
+
+        self.__launch_workers()
 
         # create new execution id
         exec_id = generateId()
@@ -146,6 +130,8 @@ class Listener(mapreduce_pb2_grpc.MapReduceMasterServicer):
         log.info(status)
         yield mapreduce_pb2.ExecutionInfo(exec_id = exec_id, status = status)
 
+        self.rm.destroy_workers()
+
     def __getworker(self):
         worker = None
 
@@ -160,8 +146,32 @@ class Listener(mapreduce_pb2_grpc.MapReduceMasterServicer):
             workers_mutex.release()
 
             if not worker:
-                time.sleep(0.2)
+                time.sleep(1)
         return worker
+
+    def __execute_chunk(self, worker, task):
+        try:
+            # assign chunk to worker
+            with grpc.insecure_channel("{}:{}".format(worker[0], worker[1])) as channel:
+                stub = mapreduce_pb2_grpc.MapReduceWorkerStub(channel)
+                log.debug('Completed ' + task_str(task))
+                return stub.Execute(task)
+        except BaseException as e:
+            print(e)
+            log.error('Error executing ' + task_str(task) + ', ' + str(e))
+        finally:
+            # return the work to the pool
+            workers_mutex.acquire()
+            workers.put(worker)
+            workers_mutex.release()
+
+    def __launch_workers(self):
+        worker_list = self.rm.create_workers(2)
+        shuffle(worker_list)
+
+        workers = Queue()
+        for worker in worker_list:
+            workers.put(worker)
 
 def run_mapreduce_master(port=MAP_REDUCE_MASTER_PORT):
     if not os.path.exists('logs') or not os.path.isdir('logs'):
