@@ -89,11 +89,8 @@ if [[ $1 == 'deploy' ]]; then
     
 elif [[ $1 == 'start' ]]; then
 
-    echo -e "\n\n***Starting KeyValueStore VM"
-    gcloud compute instances start $key_value_store --zone $zone
-
-    echo -e "\n\n***Starting MapReduceMaster VM"
-    gcloud compute instances start $map_reduce_master --zone $zone
+    echo -e "***Starting KeyValueStore, MapReduceMaster VM"
+    gcloud compute instances start $key_value_store $map_reduce_master --zone $zone
 
     echo -e "\n\n***Waiting for VMs to open SSH port"
     key_value_store_ip=$(gcloud compute instances list | awk '/'$key_value_store'/ {print $5}')
@@ -122,6 +119,10 @@ elif [[ $1 == 'start' ]]; then
     
     echo -e "\n\n***KeyValueStore ip ${key_value_store_ip}"
     echo -e "\n\n***MapReduceMaster ip ${map_reduce_master_ip}"
+elif [[ $1 == 'stop' ]]; then
+    
+    echo -e "***Stopping KeyValueStore, MapReduceMaster VM"
+    gcloud compute instances stop $key_value_store $map_reduce_master --zone $zone
 
 else
     echo -e "Specify command deploy/start"
