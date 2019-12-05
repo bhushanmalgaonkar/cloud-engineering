@@ -30,7 +30,7 @@ if [[ $1 == 'deploy' ]]; then
     gcloud compute scp $GOOGLE_APPLICATION_CREDENTIALS $user@$map_reduce_master:~/gcloud.json --zone $zone
     gcloud compute ssh $user@$map_reduce_master --command "echo \"export GOOGLE_APPLICATION_CREDENTIALS=~/gcloud.json\" >> ~/.profile; source ~/.profile" --zone $zone
     echo -e "\n\n***Installing python dependencies"
-    gcloud compute ssh $user@$map_reduce_master --command "sudo apt -y install python3-pip;pip3 install -r ~/a2/requirements.txt" --zone $zone
+    gcloud compute ssh $user@$map_reduce_master --command "sudo apt -y install python3-pip;sudo pip3 install -r ~/a2/requirements.txt --system" --zone $zone
     
     echo -e "\n\n***Stopping instance"
     gcloud compute instances stop $map_reduce_master --zone $zone
@@ -130,13 +130,13 @@ elif [[ $1 == 'delete' ]]; then
     echo -e "***Deleting KeyValueStore"
     gcloud compute instances delete key-value-store --zone $zone --quiet
     
-    echo -e "***\n\nDeleting MapReduceMaster"
+    echo -e "\n\n***Deleting MapReduceMaster"
     gcloud compute instances delete map-reduce-master --zone $zone --quiet
     
-    echo -e "***\n\nDeleting all MapReduceWorkers"
+    echo -e "\n\n***Deleting all MapReduceWorkers"
     gcloud compute instances list --filter="labels:map-reduce-worker" | awk 'NR>1 {print $1}' | xargs -L 1 gcloud compute instances delete --zone $zone --quiet
 
-    echo -e "***\n\nDeleting base-snapshot"
+    echo -e "\n\n***Deleting base-snapshot"
     gcloud compute snapshots delete base-snapshot --quiet
 
 else

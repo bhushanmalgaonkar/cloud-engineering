@@ -58,7 +58,7 @@ def create_worker_instance(instance_name, disk_name=None, wait=False):
             "items": [
                 {
                 "key": "startup-script",
-                "value": "#! /bin/bash\nsudo -u {} bash -c 'python3 /home/{}/a2/mapreduce_worker.py -p {}'".format(USER, USER, MAP_REDUCE_WORKER_PORT)
+                "value": "#! /bin/bash\nsleep 1m\npython3 /home/{}/a2/mapreduce_worker.py -p {}".format(USER, MAP_REDUCE_WORKER_PORT)
                 }
             ]
         },
