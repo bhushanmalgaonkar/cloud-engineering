@@ -29,11 +29,16 @@ def worker_str(worker):
 
 class Listener(mapreduce_pb2_grpc.MapReduceMasterServicer):
     def __init__(self, *args, **kwargs):
+        log.info("Initializing MapReduceMaster")
         self.rm = ResourceManager()
-        self.kvstore = KeyValueStoreClient()
+
+        self.KV_STORE_HOST = self.rm.find_kvstore()
+        self.kvstore = KeyValueStoreClient(self.KV_STORE_HOST)
 
         self.workers = Queue()
         self.workers_mutex = threading.Lock()
+
+        log.info("Initializing MapReduceMaster is complete, KV_STORE_HOST: {}".format(self.KV_STORE_HOST))
 
     def SubmitJob(self, job, context):
 
@@ -43,11 +48,12 @@ class Listener(mapreduce_pb2_grpc.MapReduceMasterServicer):
             .format(job.code_id, job.data_id, exec_id))
         yield mapreduce_pb2.ExecutionInfo(exec_id = exec_id, status = 'Received job')
 
-        yield mapreduce_pb2.ExecutionInfo(exec_id = exec_id, status = 'Launching workers')
+        yield mapreduce_pb2.ExecutionInfo(exec_id = exec_id, status = 'Setting up workers')
         self.__launch_workers()
-        yield mapreduce_pb2.ExecutionInfo(exec_id = exec_id, status = 'Launching workers is complete')
+        yield mapreduce_pb2.ExecutionInfo(exec_id = exec_id, status = 'Setting up workers is complete')
 
         # get all chunk ids from database
+        log.info('Downloading chunk metadata from KeyValueStore')
         chunks = self.kvstore.get_chunk_metadata(job.data_id)
         worker_threads = []
         
@@ -57,7 +63,6 @@ class Listener(mapreduce_pb2_grpc.MapReduceMasterServicer):
             worker = self.__getworker()
             
             status = 'map_task {}/{} --> {}'.format(idx + 1, len(chunks), worker)
-            print(status)
             log.info(status)
             yield mapreduce_pb2.ExecutionInfo(exec_id = exec_id, status = status)
             
@@ -81,7 +86,6 @@ class Listener(mapreduce_pb2_grpc.MapReduceMasterServicer):
             wthread.join()
 
         status = 'All map_tasks finished'
-        print(status)
         log.info(status)
         yield mapreduce_pb2.ExecutionInfo(exec_id = exec_id, status = status)
 
@@ -97,10 +101,8 @@ class Listener(mapreduce_pb2_grpc.MapReduceMasterServicer):
 
         shuffled_output_doc_id = generateId()
         self.kvstore.upload_bytes(exec_id, shuffled_output_doc_id, pickle.dumps(shuffled_output))
-        print('shuffled_output_doc_id:', shuffled_output_doc_id)
 
         status = 'Shuffling and sorting of mapper outputs is complete.'
-        print(status)  
         log.info(status)      
         yield mapreduce_pb2.ExecutionInfo(exec_id = exec_id, status = status)
 
@@ -115,24 +117,24 @@ class Listener(mapreduce_pb2_grpc.MapReduceMasterServicer):
         wthread.start()
 
         status = 'reduce_task --> {}'.format(worker)
-        print(status)
         log.info(status)
         yield mapreduce_pb2.ExecutionInfo(exec_id = exec_id, status = status)
 
         wthread.join()
         status = 'reduce_task finished.'
-        print(status)
         log.info(status)
         yield mapreduce_pb2.ExecutionInfo(exec_id = exec_id, status = status)
 
         status = 'Success'
-        print(status)
         log.info(status)
         yield mapreduce_pb2.ExecutionInfo(exec_id = exec_id, status = status)
 
+        yield mapreduce_pb2.ExecutionInfo(exec_id = exec_id, status = 'Cleaning up workers')
         self.rm.destroy_workers()
+        yield mapreduce_pb2.ExecutionInfo(exec_id = exec_id, status = 'Cleaning up workers is complete')
 
     def __getworker(self):
+        log.info("Waiting for worker")
         worker = None
 
         # loop until we successfully acquire a worker
@@ -147,6 +149,8 @@ class Listener(mapreduce_pb2_grpc.MapReduceMasterServicer):
 
             if not worker:
                 time.sleep(1)
+
+        log.info("Got one worker")
         return worker
 
     def __execute_chunk(self, worker, task):

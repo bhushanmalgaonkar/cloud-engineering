@@ -2,6 +2,7 @@
 
 import time
 import socket
+import logging as log
 
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
@@ -17,7 +18,7 @@ WORKER_DISK_NAME = 'base-snapshot'
 compute = build('compute', 'v1')
 
 def create_worker_boot_disk(disk_name, wait=False):
-    print("Creating worker boot disk {}".format(disk_name))
+    log.info("Creating worker boot disk {}".format(disk_name))
 
     disk_body = {
         "name": disk_name,
@@ -29,19 +30,23 @@ def create_worker_boot_disk(disk_name, wait=False):
 
     response = compute.disks().insert(project=GCLOUD_PROJECT, zone=GCLOUD_ZONE, body=disk_body).execute()
     if wait:
-        return wait_for_operation(response)
+        response = wait_for_operation(response)
+
+    log.info("Creating worker boot disk {} is successful".format(disk_name))
     return response
 
 def delete_disk(disk_name, wait=False):
-    print("Deleting disk {}".format(disk_name))
+    log.info("Deleting disk {}".format(disk_name))
 
     response = compute.disks().delete(project=GCLOUD_PROJECT, zone=GCLOUD_ZONE, disk=disk_name).execute()
     if wait:
-        return wait_for_operation(response)
+        response = wait_for_operation(response)
+
+    log.info("Deleting disk {} is successful".format(disk_name))
     return response
 
 def create_worker_instance(instance_name, disk_name=None, wait=False):
-    print("Creating worker instance {}".format(disk_name))
+    log.info("Creating worker instance {}".format(disk_name))
 
     if not disk_name:
         disk_name = instance_name
@@ -123,54 +128,68 @@ def create_worker_instance(instance_name, disk_name=None, wait=False):
         response = wait_for_operation(response)
         wait_port_open(get_instance_ip(instance_name), 22)
 
-        # wait for startup script to run
+        log.info("Waiting 5 sec for startup-script to complete")
         time.sleep(5)
+
+    log.info("Creating worker instance {} is successful".format(disk_name))
     return response
 
 def start_instance(instance_name, wait=False):
-    print("Stopping instance {}".format(instance_name))
+    log.info("Starting instance {}".format(instance_name))
 
     response = compute.instances().start(project=GCLOUD_PROJECT, zone=GCLOUD_ZONE, instance=instance_name).execute()
     if wait:
         response = wait_for_operation(response)
         wait_port_open(get_instance_ip(instance_name), 22)
+
+    log.info("Starting instance {} is successful".format(instance_name))
     return response
 
 def stop_instance(instance_name, wait=False):
-    print("Stopping instance {}".format(instance_name))
+    log.info("Stopping instance {}".format(instance_name))
     
     try:
         response = compute.instances().stop(project=GCLOUD_PROJECT, zone=GCLOUD_ZONE, instance=instance_name).execute()
         if wait:
-            return wait_for_operation(response)
+            response = wait_for_operation(response)
+
+        log.info("Stopping instance {} is successful".format(instance_name))
         return response
     except HttpError as e:
+        log.warn("Instance {} was not found".format(instance_name))
         if e.args[0]['status'] != '404':
             raise e
 
 def delete_instance(instance_name, wait=False):
-    print("Deleting instance {}".format(instance_name))
+    log.info("Deleting instance {}".format(instance_name))
 
     try:
         response = compute.instances().delete(project=GCLOUD_PROJECT, zone=GCLOUD_ZONE, instance=instance_name).execute()
         if wait:
-            return wait_for_operation(response)
+            response = wait_for_operation(response)
+
+        log.info("Deleting instance {} is successful".format(instance_name))
         return response
     except HttpError as e:
+        log.warn("Instance {} was not found".format(instance_name))
         if e.args[0]['status'] != '404':
             raise e
 
 def wait_port_open(ip, port):
-    while True:
+    log.info("Waiting for {}:{} to open".format(ip, port))
+    for _ in range(150):    # 2.5 minutes
         try:
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             s.connect((ip, port))
-            break
+            log.info("Port is open")
+            return
         except:
+            time.sleep(1)
             pass
+    log.error("Timeout while waiting for {}:{} to open".format(ip, port))
 
 def list_instances():
-    print("Listing instances")
+    log.info("Listing instances")
     response = compute.instances().list(project=GCLOUD_PROJECT, zone=GCLOUD_ZONE).execute()
 
     instances = {}
@@ -180,35 +199,41 @@ def list_instances():
                 'status': instance['status'] if 'status' in instance else '', 
                 'ip': instance['networkInterfaces'][0]['accessConfigs'][0]['natIP'] if instance['status'] == 'RUNNING' else ''
             }
+    
+    log.info(str(instance))
     return instances
 
-from pprint import pprint
 def get_instance_ip(instance_name):
+    log.info("Getting ip for instance {}".format(instance_name))
     result = compute.instances().list(project=GCLOUD_PROJECT, zone=GCLOUD_ZONE).execute()
     if 'items' not in result:
+        log.error("No instances found")
         return None
 
     for instance in result['items']:
         if instance['selfLink'].split('/')[-1] == instance_name and instance['status'] == 'RUNNING':
-            return instance['networkInterfaces'][0]['accessConfigs'][0]['natIP']
+            ip = instance['networkInterfaces'][0]['accessConfigs'][0]['natIP']
+            log.info("IP of instance {} is {}".format(instance_name, ip))
+            return ip
 
+    log.error("Instance {} was not found".format(instance_name))
     return None
 
 
 def wait_for_operation(operation):
-    print("Waiting for operation")
+    log.info("Waiting for operation")
     
     itrs = 0
     while True:
         result = compute.zoneOperations().get(project=GCLOUD_PROJECT, zone=GCLOUD_ZONE, operation=operation['name']).execute()
 
         if result['status'] == 'DONE':
-            print("Done{}".format(' ' * 10))
+            log.info("Done{}".format(' ' * 10))
             if 'error' in result:
                 raise Exception(result['error'])
             return result
 
-        print("{}{}{}".format(result['status'], '.' * itrs, ' ' * (3 - itrs)), end="\r")
+        # print("{}{}{}".format(result['status'], '.' * itrs, ' ' * (3 - itrs)), end="\r")
         itrs = (itrs + 1) % 3
 
 if __name__ == "__main__":

@@ -4,6 +4,7 @@ import os
 import sys
 import grpc
 import pickle
+import logging as log
 
 import kvstore_pb2, kvstore_pb2_grpc
 from constants import KV_STORE_PORT, KV_STORE_ENCODING, KV_STORE_BLOCK_SIZE
@@ -12,11 +13,15 @@ from util import generateId, file_iterator, str_iterator
 from resource_manager import ResourceManager
 
 class KeyValueStoreClient:
-    def __init__(self):
+    def __init__(self, kvstore_host):
+        log.info("Initializing KeyValueStoreClient")
+
         self.rm = ResourceManager()
-        self.KV_STORE_HOST = self.rm.find_kvstore()
-        self.KV_STORE_DB_PATH = 'mysql+pymysql://root:P@ssword123@{}:3306/kvstore'.format(self.KV_STORE_HOST)
+        self.KV_STORE_HOST = kvstore_host
+        self.KV_STORE_DB_PATH = 'mysql+pymysql://root:P@ssword123@{}:3306/kvstore'.format(kvstore_host)
         self.db = DataBaseHandler(self.KV_STORE_DB_PATH)
+
+        log.info("Initializing KeyValueStoreClient is successful")
 
     '''
         Upload a bytes object as document
@@ -71,6 +76,7 @@ class KeyValueStoreClient:
         Upload an entire directory
     '''
     def upload_directory(self, dirpath, stub=None):
+        log.info("Uploading directory {}".format(dirpath))
         if not stub:
             with grpc.insecure_channel("{}:{}".format(self.KV_STORE_HOST, KV_STORE_PORT)) as channel:
                 stub = kvstore_pb2_grpc.KeyValueStoreStub(channel)
@@ -78,12 +84,15 @@ class KeyValueStoreClient:
                 channel.unsubscribe(self.close)
         else:
             dir_id = self.__uploaddirectory(dirpath, stub)
+
+        log.info("Uploading directory {} is successful. dir_id: {}".format(dirpath, dir_id))
         return dir_id 
 
     '''
         Saves all the files associated with dir_id at save_path
     '''
     def download_directory(self, dir_id, save_path, flatten=False, stub=None):
+        log.info("Downloading directory {} at {}".format(dir_id, save_path))
         if not stub:
             with grpc.insecure_channel("{}:{}".format(self.KV_STORE_HOST, KV_STORE_PORT)) as channel:
                 stub = kvstore_pb2_grpc.KeyValueStoreStub(channel)
@@ -91,6 +100,8 @@ class KeyValueStoreClient:
                 channel.unsubscribe(self.close)
         else:
             self.__downloaddirectory(dir_id, save_path, flatten, stub)
+
+        log.info("Downloading directory {} at {} is successful".format(dir_id, save_path))
 
     '''
         Downloads single file from key-value store
@@ -225,21 +236,21 @@ class KeyValueStoreClient:
     def close(self, channel):
         channel.close()
 
+# if __name__ == "__main__":
+#     rm = ResourceManager()
+#     k = KeyValueStoreClient(rm.find_kvstore())
+#     dir_id = k.upload_directory(sys.argv[1])
+#     k.download_directory(dir_id, 'hi-there')
 
-if __name__ == "__main__":
-    k = KeyValueStoreClient()
-    dir_id = k.upload_directory(sys.argv[1])
-    k.download_directory(dir_id, 'hi-there')
+#     s = k.read_bytes('1d140d8f-1918-4ae3-b0da-fefb3fec7fb0-191110-150149', 'd4299dba-7530-4f19-bb06-463aacf5bdd2-191110-150152')
+#     print(pickle.loads(s))
 
-    # s = k.read_bytes('1d140d8f-1918-4ae3-b0da-fefb3fec7fb0-191110-150149', 'd4299dba-7530-4f19-bb06-463aacf5bdd2-191110-150152')
-    # print(pickle.loads(s))
+#     dir_id = generateId()
+#     doc_id = generateId()
 
-    # dir_id = generateId()
-    # doc_id = generateId()
+#     d = {'hi': [1, 2, 3], 'hello': [4, 5, 6]}
+#     k.upload_bytes(dir_id, doc_id, pickle.dumps(d))
 
-    # d = {'hi': [1, 2, 3], 'hello': [4, 5, 6]}
-    # k.upload_bytes(dir_id, doc_id, pickle.dumps(d))
-
-    # x = pickle.loads(k.read_bytes(dir_id, doc_id))
-    # print(x)
+#     x = pickle.loads(k.read_bytes(dir_id, doc_id))
+#     print(x)
     

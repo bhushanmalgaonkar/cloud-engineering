@@ -19,11 +19,11 @@ class Listener(kvstore_pb2_grpc.KeyValueStoreServicer):
             if not os.path.exists(KV_STORE_ROOT_DIR):
                 os.makedirs(KV_STORE_ROOT_DIR)
         except:
-            print('Error creating base directory \'{}\'.'.format(KV_STORE_ROOT_DIR))
+            log.error('Error creating base directory \'{}\'.'.format(KV_STORE_ROOT_DIR))
             exit(1)
 
     def Save(self, data_block, context):
-        log.debug('save:{}'.format(data_block.key))
+        log.info('Save:{}'.format(data_block.key))
         try:
             blockfilename = os.path.join(KV_STORE_ROOT_DIR, data_block.key)
             with open(blockfilename, 'wb') as f:
@@ -33,7 +33,7 @@ class Listener(kvstore_pb2_grpc.KeyValueStoreServicer):
             return kvstore_pb2.SaveStatus(status = 'failed')
 
     def Get(self, id, context):
-        log.debug('get :{}'.format(id.id))
+        log.debug('Get :{}'.format(id.id))
         try:
             blockfilename = os.path.join(KV_STORE_ROOT_DIR, id.id)
             data = bytes()
@@ -60,13 +60,12 @@ def run_kvstore_server(port=KV_STORE_PORT):
     kvstore_pb2_grpc.add_KeyValueStoreServicer_to_server(Listener(), server)
     server.add_insecure_port("0.0.0.0:{}".format(port))
     server.start()
-    print('KeyValueStore server listening on port {}'.format(port))
+    log.info('KeyValueStore server listening on port {}'.format(port))
     while True:
         try:
             time.sleep(5)
         except KeyboardInterrupt:
-            print("KeyboardInterrupt on kvstore:{}".format(port))
-            log.info('KeyboardInterrupt')
+            log.error("KeyboardInterrupt on kvstore:{}".format(port))
             server.stop(0)
             break
         except:

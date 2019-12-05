@@ -21,16 +21,18 @@ from resource_manager import ResourceManager
 class Listener(mapreduce_pb2_grpc.MapReduceWorkerServicer):
     def __init__(self, *args, **kwargs):
         self.rm = ResourceManager()
-        self.kvstore = KeyValueStoreClient()
+        self.kvstore = KeyValueStoreClient(self.rm.find_kvstore())
 
     def Execute(self, task, context):
-        print('execute request. code_id:{}, chunk_id:{}, type:{}'.format(task.code_id, task.input_chunk_id, task.type))
-        log.info('execute request. code_id:{}, chunk_id:{}, type:{}'.format(task.code_id, task.input_chunk_id, task.type))
+        print('Execute request. code_id:{}, chunk_id:{}, type:{}'.format(task.code_id, task.input_chunk_id, task.type))
+        log.info('Execute request. code_id:{}, chunk_id:{}, type:{}'.format(task.code_id, task.input_chunk_id, task.type))
         
         # download code and chunk
+        log.info('Downloadin chunk')
         workplace = os.path.join(INTERMEDIATE_OUTPUTS_DIR, task.output_doc_id)
         self.kvstore.download_directory(task.code_id, workplace, flatten=True)
 
+        log.info('Downloading code')
         module_name = generateId()
         os.rename(os.path.join(workplace, 'task.py'), os.path.join(workplace, module_name + '.py'))
 
