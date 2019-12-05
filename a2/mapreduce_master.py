@@ -18,9 +18,6 @@ from kvstore_client import KeyValueStoreClient
 from util import generateId
 from gcloud_util import *
 
-workers = Queue()
-workers_mutex = threading.Lock()
-
 def task_str(task):
     return 'Task: code_id={}, type={}, input_dir_id={}, input_doc_id={}, input_chunk_id={}, \
                         output_dir_id={}, output_doc_id={}'.format(task.code_id, task.type, 
@@ -34,6 +31,9 @@ class Listener(mapreduce_pb2_grpc.MapReduceMasterServicer):
     def __init__(self, *args, **kwargs):
         self.rm = ResourceManager()
         self.kvstore = KeyValueStoreClient()
+
+        self.workers = Queue()
+        self.workers_mutex = threading.Lock()
 
     def SubmitJob(self, job, context):
 
@@ -138,12 +138,12 @@ class Listener(mapreduce_pb2_grpc.MapReduceMasterServicer):
         # loop until we successfully acquire a worker
         while not worker:
             # check if worker is still available
-            workers_mutex.acquire()
-            if not workers.empty():
-                worker = workers.get()
+            self.workers_mutex.acquire()
+            if not self.workers.empty():
+                worker = self.workers.get()
             else:
-                print('all workers busy, wait..')
-            workers_mutex.release()
+                log.info('all workers busy, wait..')
+            self.workers_mutex.release()
 
             if not worker:
                 time.sleep(1)
@@ -161,9 +161,9 @@ class Listener(mapreduce_pb2_grpc.MapReduceMasterServicer):
             log.error('Error executing ' + task_str(task) + ', ' + str(e))
         finally:
             # return the work to the pool
-            workers_mutex.acquire()
-            workers.put(worker)
-            workers_mutex.release()
+            self.workers_mutex.acquire()
+            self.workers.put(worker)
+            self.workers_mutex.release()
 
     def __launch_workers(self):
         log.info("Creating workers")
@@ -171,9 +171,9 @@ class Listener(mapreduce_pb2_grpc.MapReduceMasterServicer):
         log.info("Workers created" + str(worker_list))
         shuffle(worker_list)
 
-        workers = Queue()
+        self.workers = Queue()
         for worker in worker_list:
-            workers.put(worker)
+            self.workers.put(worker)
 
 def run_mapreduce_master(port=MAP_REDUCE_MASTER_PORT):
     if not os.path.exists('logs') or not os.path.isdir('logs'):
