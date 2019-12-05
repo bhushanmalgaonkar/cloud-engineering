@@ -37,13 +37,15 @@ class Listener(mapreduce_pb2_grpc.MapReduceMasterServicer):
 
     def SubmitJob(self, job, context):
 
-        self.__launch_workers()
-
         # create new execution id
         exec_id = generateId()
         log.info('Received job: code_id:{} data_id:{}. Results will be stored under:{}'\
             .format(job.code_id, job.data_id, exec_id))
         yield mapreduce_pb2.ExecutionInfo(exec_id = exec_id, status = 'Received job')
+
+        yield mapreduce_pb2.ExecutionInfo(exec_id = exec_id, status = 'Launching workers')
+        self.__launch_workers()
+        yield mapreduce_pb2.ExecutionInfo(exec_id = exec_id, status = 'Launching workers is complete')
 
         # get all chunk ids from database
         chunks = self.kvstore.get_chunk_metadata(job.data_id)
@@ -166,7 +168,7 @@ class Listener(mapreduce_pb2_grpc.MapReduceMasterServicer):
     def __launch_workers(self):
         log.info("Creating workers")
         worker_list = self.rm.create_workers(2)
-        log.info("Workers created" + worker_list)
+        log.info("Workers created" + str(worker_list))
         shuffle(worker_list)
 
         workers = Queue()

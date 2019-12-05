@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 import time
+import socket
 
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
@@ -119,7 +120,11 @@ def create_worker_instance(instance_name, disk_name=None, wait=False):
     }
     response = compute.instances().insert(project=GCLOUD_PROJECT, zone=GCLOUD_ZONE, body=instance_body).execute()
     if wait:
-        return wait_for_operation(response)
+        response = wait_for_operation(response)
+        wait_port_open(get_instance_ip(instance_name), 22)
+
+        # wait for startup script to run
+        time.sleep(5)
     return response
 
 def start_instance(instance_name, wait=False):
@@ -127,7 +132,8 @@ def start_instance(instance_name, wait=False):
 
     response = compute.instances().start(project=GCLOUD_PROJECT, zone=GCLOUD_ZONE, instance=instance_name).execute()
     if wait:
-        return wait_for_operation(response)
+        response = wait_for_operation(response)
+        wait_port_open(get_instance_ip(instance_name), 22)
     return response
 
 def stop_instance(instance_name, wait=False):
@@ -153,6 +159,15 @@ def delete_instance(instance_name, wait=False):
     except HttpError as e:
         if e.args[0]['status'] != '404':
             raise e
+
+def wait_port_open(ip, port):
+    while True:
+        try:
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            s.connect((ip, port))
+            break
+        except:
+            pass
 
 def list_instances():
     print("Listing instances")
@@ -195,8 +210,6 @@ def wait_for_operation(operation):
 
         print("{}{}{}".format(result['status'], '.' * itrs, ' ' * (3 - itrs)), end="\r")
         itrs = (itrs + 1) % 3
-
-        time.sleep(1)
 
 if __name__ == "__main__":
     print(list_instances())

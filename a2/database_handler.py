@@ -9,7 +9,7 @@ class DataBaseHandler:
         conn = self.engine.connect()        
         conn.execute(""" CREATE TABLE IF NOT EXISTS chunks (
                         dir_id VARCHAR(50) NOT NULL,
-                        doc_id VARCHAR(50) NOT NULL,
+                        doc_id VARCHAR(300) NOT NULL,
                         chunk_index int NOT NULL,
                         chunk_id VARCHAR(50) PRIMARY KEY
                     ); """)
