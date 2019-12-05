@@ -5,7 +5,7 @@ import time
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
-from constants import MAP_REDUCE_WORKER_PORT
+from constants import MAP_REDUCE_WORKER_PORT, USER
 
 GCLOUD_PROJECT = 'bhushan-malgaonkar'
 GCLOUD_REGION = 'us-central1'
@@ -58,7 +58,7 @@ def create_worker_instance(instance_name, disk_name=None, wait=False):
             "items": [
                 {
                 "key": "startup-script",
-                "value": "#!/bin/bash\npython3 ~/a2/mapreduce_worker.py -p {}".format(MAP_REDUCE_WORKER_PORT)
+                "value": "#! /bin/bash\nsudo -u {} bash -c 'python3 /home/{}/a2/mapreduce_worker.py -p {}'".format(USER, USER, MAP_REDUCE_WORKER_PORT)
                 }
             ]
         },
@@ -111,7 +111,8 @@ def create_worker_instance(instance_name, disk_name=None, wait=False):
                     "https://www.googleapis.com/auth/monitoring.write",
                     "https://www.googleapis.com/auth/servicecontrol",
                     "https://www.googleapis.com/auth/service.management.readonly",
-                    "https://www.googleapis.com/auth/trace.append"
+                    "https://www.googleapis.com/auth/trace.append",
+                    "https://www.googleapis.com/auth/compute"
                 ]
             }
         ]

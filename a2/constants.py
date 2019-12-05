@@ -1,15 +1,14 @@
 #!/usr/bin/python3
 
-KV_STORE_HOST = 'localhost'
+USER="mruser"
+
 KV_STORE_PORT = 7894
-KV_STORE_DB_PATH = 'mysql+pymysql://root:P@ssword123@{}:3306/kvstore'.format(KV_STORE_HOST)
+MAP_REDUCE_MASTER_PORT = 9898
+MAP_REDUCE_WORKER_PORT = 5000
+
 KV_STORE_ROOT_DIR = 'chunks'
 KV_STORE_BLOCK_SIZE = 1024 * 1024
 KV_STORE_ENCODING = 'utf-8'
-
-MAP_REDUCE_MASTER_HOST = 'localhost'
-MAP_REDUCE_MASTER_PORT = 9898
-MAP_REDUCE_WORKER_PORT = 5656
 
 INTERMEDIATE_OUTPUTS_DIR = 'intermediate_outputs'
 

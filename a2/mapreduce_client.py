@@ -8,15 +8,14 @@ import logging as log
 
 import mapreduce_pb2, mapreduce_pb2_grpc
 from kvstore_client import KeyValueStoreClient
-from constants import MAP_REDUCE_MASTER_HOST, MAP_REDUCE_MASTER_PORT
+from constants import MAP_REDUCE_MASTER_PORT
 from resource_manager import ResourceManager
 
 class MapReduceClient:
     def __init__(self):
         self.rm = ResourceManager()
-        self.rm.find_kvstore()
-        self.rm.find_mapreduce_master()
         self.kvstore = KeyValueStoreClient()
+        self.MAP_REDUCE_MASTER_HOST = self.rm.find_mapreduce_master()
 
     def close(self, channel):
         channel.close()
@@ -39,7 +38,7 @@ class MapReduceClient:
             log.debug('code_id={}'.format(code_id))
 
             # rpc call submit job with data_id and code_id
-            with grpc.insecure_channel("{}:{}".format(MAP_REDUCE_MASTER_HOST, MAP_REDUCE_MASTER_PORT)) as channel:
+            with grpc.insecure_channel("{}:{}".format(self.MAP_REDUCE_MASTER_HOST, MAP_REDUCE_MASTER_PORT)) as channel:
                 stub = mapreduce_pb2_grpc.MapReduceMasterStub(channel)
 
                 exec_info = stub.SubmitJob(mapreduce_pb2.Job(code_id = code_id, data_id = data_id))

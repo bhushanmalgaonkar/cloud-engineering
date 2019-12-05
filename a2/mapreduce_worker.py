@@ -13,8 +13,7 @@ from random import random
 
 import mapreduce_pb2, mapreduce_pb2_grpc
 import kvstore_pb2, kvstore_pb2_grpc
-from constants import KV_STORE_DB_PATH, KV_STORE_HOST, KV_STORE_PORT, KV_STORE_ENCODING, INTERMEDIATE_OUTPUTS_DIR
-from constants import TASKS_PER_WORKER
+from constants import KV_STORE_ENCODING, INTERMEDIATE_OUTPUTS_DIR, TASKS_PER_WORKER
 from kvstore_client import KeyValueStoreClient
 from util import generateId
 from resource_manager import ResourceManager
@@ -22,7 +21,6 @@ from resource_manager import ResourceManager
 class Listener(mapreduce_pb2_grpc.MapReduceWorkerServicer):
     def __init__(self, *args, **kwargs):
         self.rm = ResourceManager()
-        self.rm.find_kvstore()
         self.kvstore = KeyValueStoreClient()
 
     def Execute(self, task, context):

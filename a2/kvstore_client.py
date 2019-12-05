@@ -6,20 +6,24 @@ import grpc
 import pickle
 
 import kvstore_pb2, kvstore_pb2_grpc
-from constants import KV_STORE_HOST, KV_STORE_PORT, KV_STORE_DB_PATH, KV_STORE_ENCODING, KV_STORE_BLOCK_SIZE
+from constants import KV_STORE_PORT, KV_STORE_ENCODING, KV_STORE_BLOCK_SIZE
 from database_handler import DataBaseHandler
 from util import generateId, file_iterator, str_iterator
+from resource_manager import ResourceManager
 
 class KeyValueStoreClient:
     def __init__(self):
-        self.db = DataBaseHandler(KV_STORE_DB_PATH)
+        self.rm = ResourceManager()
+        self.KV_STORE_HOST = self.rm.find_kvstore()
+        self.KV_STORE_DB_PATH = 'mysql+pymysql://root:P@ssword123@{}:3306/kvstore'.format(self.KV_STORE_HOST)
+        self.db = DataBaseHandler(self.KV_STORE_DB_PATH)
 
     '''
         Upload a bytes object as document
     '''
     def upload_bytes(self, dir_id, doc_id, bytez, stub=None):
         if not stub:
-            with grpc.insecure_channel("{}:{}".format(KV_STORE_HOST, KV_STORE_PORT)) as channel:
+            with grpc.insecure_channel("{}:{}".format(self.KV_STORE_HOST, KV_STORE_PORT)) as channel:
                 stub = kvstore_pb2_grpc.KeyValueStoreStub(channel)
                 self.__uploadbytes(dir_id, doc_id, bytez, stub)
                 channel.unsubscribe(self.close)
@@ -31,7 +35,7 @@ class KeyValueStoreClient:
     '''
     def read_bytes(self, dir_id, doc_id, stub=None):
         if not stub:
-            with grpc.insecure_channel("{}:{}".format(KV_STORE_HOST, KV_STORE_PORT)) as channel:
+            with grpc.insecure_channel("{}:{}".format(self.KV_STORE_HOST, KV_STORE_PORT)) as channel:
                 stub = kvstore_pb2_grpc.KeyValueStoreStub(channel)
                 bytez = self.__readbytes(dir_id, doc_id, stub)
                 channel.unsubscribe(self.close)
@@ -44,7 +48,7 @@ class KeyValueStoreClient:
     '''
     def upload_file(self, dir_id, filepath, stub=None):
         if not stub:
-            with grpc.insecure_channel("{}:{}".format(KV_STORE_HOST, KV_STORE_PORT)) as channel:
+            with grpc.insecure_channel("{}:{}".format(self.KV_STORE_HOST, KV_STORE_PORT)) as channel:
                 stub = kvstore_pb2_grpc.KeyValueStoreStub(channel)
                 self.__uploadfile(dir_id, filepath, stub)
                 channel.unsubscribe(self.close)
@@ -56,7 +60,7 @@ class KeyValueStoreClient:
     '''
     def upload_file_str(self, dir_id, doc_id, string, stub=None):
         if not stub:
-            with grpc.insecure_channel("{}:{}".format(KV_STORE_HOST, KV_STORE_PORT)) as channel:
+            with grpc.insecure_channel("{}:{}".format(self.KV_STORE_HOST, KV_STORE_PORT)) as channel:
                 stub = kvstore_pb2_grpc.KeyValueStoreStub(channel)
                 self.__uploadfilestr(dir_id, doc_id, string, stub)
                 channel.unsubscribe(self.close)
@@ -68,7 +72,7 @@ class KeyValueStoreClient:
     '''
     def upload_directory(self, dirpath, stub=None):
         if not stub:
-            with grpc.insecure_channel("{}:{}".format(KV_STORE_HOST, KV_STORE_PORT)) as channel:
+            with grpc.insecure_channel("{}:{}".format(self.KV_STORE_HOST, KV_STORE_PORT)) as channel:
                 stub = kvstore_pb2_grpc.KeyValueStoreStub(channel)
                 dir_id = self.__uploaddirectory(dirpath, stub)
                 channel.unsubscribe(self.close)
@@ -81,7 +85,7 @@ class KeyValueStoreClient:
     '''
     def download_directory(self, dir_id, save_path, flatten=False, stub=None):
         if not stub:
-            with grpc.insecure_channel("{}:{}".format(KV_STORE_HOST, KV_STORE_PORT)) as channel:
+            with grpc.insecure_channel("{}:{}".format(self.KV_STORE_HOST, KV_STORE_PORT)) as channel:
                 stub = kvstore_pb2_grpc.KeyValueStoreStub(channel)
                 self.__downloaddirectory(dir_id, save_path, flatten, stub)
                 channel.unsubscribe(self.close)
@@ -93,7 +97,7 @@ class KeyValueStoreClient:
     '''
     def download_file(self, dir_id, doc_id, root, flatten=False, stub=None):
         if not stub:
-            with grpc.insecure_channel("{}:{}".format(KV_STORE_HOST, KV_STORE_PORT)) as channel:
+            with grpc.insecure_channel("{}:{}".format(self.KV_STORE_HOST, KV_STORE_PORT)) as channel:
                 stub = kvstore_pb2_grpc.KeyValueStoreStub(channel)
                 self.__downloadfile(dir_id, doc_id, root, flatten, stub)
         else:
@@ -104,7 +108,7 @@ class KeyValueStoreClient:
     '''
     def download_chunk(self, chunk_id, save_path, stub=None):
         if not stub:
-            with grpc.insecure_channel("{}:{}".format(KV_STORE_HOST, KV_STORE_PORT)) as channel:
+            with grpc.insecure_channel("{}:{}".format(self.KV_STORE_HOST, KV_STORE_PORT)) as channel:
                 stub = kvstore_pb2_grpc.KeyValueStoreStub(channel)
                 data = self.__readchunk(chunk_id, stub)
         else:
@@ -123,7 +127,7 @@ class KeyValueStoreClient:
     '''
     def read_chunk(self, chunk_id, stub=None):
         if not stub:
-            with grpc.insecure_channel("{}:{}".format(KV_STORE_HOST, KV_STORE_PORT)) as channel:
+            with grpc.insecure_channel("{}:{}".format(self.KV_STORE_HOST, KV_STORE_PORT)) as channel:
                 stub = kvstore_pb2_grpc.KeyValueStoreStub(channel)
                 return self.__readchunk(chunk_id, stub)
         else:
@@ -225,7 +229,7 @@ class KeyValueStoreClient:
 if __name__ == "__main__":
     k = KeyValueStoreClient()
     dir_id = k.upload_directory(sys.argv[1])
-    k.download_directory(dir_id, 'hi there')
+    k.download_directory(dir_id, 'hi-there')
 
     # s = k.read_bytes('1d140d8f-1918-4ae3-b0da-fefb3fec7fb0-191110-150149', 'd4299dba-7530-4f19-bb06-463aacf5bdd2-191110-150152')
     # print(pickle.loads(s))
