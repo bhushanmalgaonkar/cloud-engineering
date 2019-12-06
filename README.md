@@ -155,6 +155,9 @@ All (master, worker, key-value-store) are launched on GCP n1-standard-1 (1 vCPU,
 ### Cost of developing/experimenting
 $3.10
 
+### GCP APIs
+gcloud_util.py contains utilities to create/delete instances/disks, start/stop/list available instances, get IP of an instance given name.
+
 ## Database
 1. **chunks**: stores location of a specific chunk of a file on the server
 
