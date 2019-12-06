@@ -18,10 +18,13 @@
 | allow-worker-5000  | 65534    | Ingress              | Allow           | All instances in the network | IP ranges     | 0.0.0.0/0        | tcp: 5000          |
   
 #### 3. Deploy
-  - ```scripts/command.sh deploy```
+  - ```scripts/command.sh deploy```  
+  - [logs](https://github.com/bhushanmalgaonkar/cloud-engineering/blob/master/scripts/logs/deploy.log)
 
 #### 4. Run map-reduce task
   - ```python3 a2/mapreduce_client.py -d a2/apps/invertedindex/data -c a2/invertedindex/code -o a2/invertedindex/result```
+  - [client.log](https://github.com/bhushanmalgaonkar/cloud-engineering/blob/master/scripts/logs/invertedindex-logs/client.log)
+  - [server.log](https://github.com/bhushanmalgaonkar/cloud-engineering/blob/master/scripts/logs/invertedindex-logs/master-9898.log)
 
 ## Time taken by different operations
 #### 1. Deploy: 7m48.408s
@@ -149,6 +152,8 @@ All (master, worker, key-value-store) are launched on GCP n1-standard-1 (1 vCPU,
 ]
 ```
 
+### Cost of developing/experimenting
+$3.10
 
 ## Database
 1. **chunks**: stores location of a specific chunk of a file on the server
