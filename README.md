@@ -98,6 +98,58 @@ Provides elementary funcationality to manipulate GCP compute resources such as c
 ### ResourceManager
 Provides higher level functionality to operate with GCP compute resources such as create/delete multiple instances, finding IP address of KeyValueStore and MapReduceMaster servers
 
+### Instance configuration
+All (master, worker, key-value-store) are launched on GCP n1-standard-1 (1 vCPU, 3.75GB memory) with following tweaks
+```
+"metadata": {
+    "items": [
+        {
+            "key": "startup-script",
+            "value": "#! /bin/bash\nsleep 1m\npython3 /home/{}/a2/mapreduce_worker.py -p {}".format(USER, MAP_REDUCE_WORKER_PORT)
+        }
+    ]
+},
+"disks": [
+    {
+        "kind": "compute#attachedDisk",
+        "type": "PERSISTENT",
+        "boot": True,
+        "mode": "READ_WRITE",
+        "autoDelete": True,
+        "deviceName": instance_name,
+        "source": "projects/{}/zones/{}/disks/{}".format(GCLOUD_PROJECT, GCLOUD_ZONE, disk_name)
+    }
+],
+"networkInterfaces": [
+    {
+        "kind": "compute#networkInterface",
+        "subnetwork": "projects/{}/regions/{}/subnetworks/default".format(GCLOUD_PROJECT, GCLOUD_REGION),
+        "accessConfigs": [
+            {
+                "kind": "compute#accessConfig",
+                "name": "External NAT",
+                "type": "ONE_TO_ONE_NAT",
+                "networkTier": "PREMIUM"
+            }
+        ],
+        "aliasIpRanges": []
+    }
+],
+"labels": {
+    "type": "map-reduce-worker"
+},
+"serviceAccounts": [
+    {
+        ...,
+        "scopes": [
+            ...,
+            "https://www.googleapis.com/auth/compute"
+        ]
+    }
+]
+```
+
+
 ## Database
 1. **chunks**: stores location of a specific chunk of a file on the server
 
