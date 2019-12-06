@@ -13,7 +13,7 @@ from concurrent import futures
 from resource_manager import ResourceManager
 import mapreduce_pb2, mapreduce_pb2_grpc
 import kvstore_pb2, kvstore_pb2_grpc
-from constants import MAP_REDUCE_MASTER_PORT, WORKERS, TASKS_PER_WORKER
+from constants import MAP_REDUCE_MASTER_PORT, WORKERS, NUM_WORKERS, TASKS_PER_WORKER
 from kvstore_client import KeyValueStoreClient
 from util import generateId
 from gcloud_util import *
@@ -171,13 +171,14 @@ class Listener(mapreduce_pb2_grpc.MapReduceMasterServicer):
 
     def __launch_workers(self):
         log.info("Creating workers")
-        worker_list = self.rm.create_workers(2)
+        worker_list = self.rm.create_workers(NUM_WORKERS)
         log.info("Workers created" + str(worker_list))
         shuffle(worker_list)
 
         self.workers = Queue()
         for worker in worker_list:
-            self.workers.put(worker)
+            for _ in range(TASKS_PER_WORKER):
+                self.workers.put(worker)
 
 def run_mapreduce_master(port=MAP_REDUCE_MASTER_PORT):
     if not os.path.exists('logs') or not os.path.isdir('logs'):

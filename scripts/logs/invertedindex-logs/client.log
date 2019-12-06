@@ -1,0 +1,88 @@
+INFO: Initializing MapReduceClient
+INFO: Listing instances
+INFO: URL being requested: GET https://compute.googleapis.com/compute/v1/projects/bhushan-malgaonkar/zones/us-central1-c/instances?alt=json
+DEBUG: Making request: POST https://oauth2.googleapis.com/token
+INFO: {'id': '3672038822277075748', 'creationTimestamp': '2019-12-05T12:51:24.593-08:00', 'name': 'map-reduce-master', 'tags': {'fingerprint': '42WmSpB8rSM='}, 'machineType': 'https://www.googleapis.com/compute/v1/projects/bhushan-malgaonkar/zones/us-central1-c/machineTypes/n1-standard-1', 'status': 'RUNNING', 'zone': 'https://www.googleapis.com/compute/v1/projects/bhushan-malgaonkar/zones/us-central1-c', 'canIpForward': False, 'networkInterfaces': [{'network': 'https://www.googleapis.com/compute/v1/projects/bhushan-malgaonkar/global/networks/default', 'subnetwork': 'https://www.googleapis.com/compute/v1/projects/bhushan-malgaonkar/regions/us-central1/subnetworks/default', 'networkIP': '10.128.15.204', 'name': 'nic0', 'accessConfigs': [{'type': 'ONE_TO_ONE_NAT', 'name': 'external-nat', 'natIP': '35.193.251.179', 'networkTier': 'PREMIUM', 'kind': 'compute#accessConfig'}], 'fingerprint': 'ghdH_0ukS1Y=', 'kind': 'compute#networkInterface'}], 'disks': [{'type': 'PERSISTENT', 'mode': 'READ_WRITE', 'source': 'https://www.googleapis.com/compute/v1/projects/bhushan-malgaonkar/zones/us-central1-c/disks/map-reduce-master', 'deviceName': 'persistent-disk-0', 'index': 0, 'boot': True, 'autoDelete': True, 'licenses': ['https://www.googleapis.com/compute/v1/projects/debian-cloud/global/licenses/debian-9-stretch'], 'interface': 'SCSI', 'guestOsFeatures': [{'type': 'VIRTIO_SCSI_MULTIQUEUE'}], 'kind': 'compute#attachedDisk'}], 'metadata': {'fingerprint': 'lIND2MNa_ME=', 'kind': 'compute#metadata'}, 'serviceAccounts': [{'email': '1093190347201-compute@developer.gserviceaccount.com', 'scopes': ['https://www.googleapis.com/auth/compute']}], 'selfLink': 'https://www.googleapis.com/compute/v1/projects/bhushan-malgaonkar/zones/us-central1-c/instances/map-reduce-master', 'scheduling': {'onHostMaintenance': 'MIGRATE', 'automaticRestart': True, 'preemptible': False}, 'cpuPlatform': 'Intel Haswell', 'labelFingerprint': '42WmSpB8rSM=', 'startRestricted': False, 'deletionProtection': False, 'kind': 'compute#instance'}
+INFO: Listing instances
+INFO: URL being requested: GET https://compute.googleapis.com/compute/v1/projects/bhushan-malgaonkar/zones/us-central1-c/instances?alt=json
+INFO: {'id': '3672038822277075748', 'creationTimestamp': '2019-12-05T12:51:24.593-08:00', 'name': 'map-reduce-master', 'tags': {'fingerprint': '42WmSpB8rSM='}, 'machineType': 'https://www.googleapis.com/compute/v1/projects/bhushan-malgaonkar/zones/us-central1-c/machineTypes/n1-standard-1', 'status': 'RUNNING', 'zone': 'https://www.googleapis.com/compute/v1/projects/bhushan-malgaonkar/zones/us-central1-c', 'canIpForward': False, 'networkInterfaces': [{'network': 'https://www.googleapis.com/compute/v1/projects/bhushan-malgaonkar/global/networks/default', 'subnetwork': 'https://www.googleapis.com/compute/v1/projects/bhushan-malgaonkar/regions/us-central1/subnetworks/default', 'networkIP': '10.128.15.204', 'name': 'nic0', 'accessConfigs': [{'type': 'ONE_TO_ONE_NAT', 'name': 'external-nat', 'natIP': '35.193.251.179', 'networkTier': 'PREMIUM', 'kind': 'compute#accessConfig'}], 'fingerprint': 'ghdH_0ukS1Y=', 'kind': 'compute#networkInterface'}], 'disks': [{'type': 'PERSISTENT', 'mode': 'READ_WRITE', 'source': 'https://www.googleapis.com/compute/v1/projects/bhushan-malgaonkar/zones/us-central1-c/disks/map-reduce-master', 'deviceName': 'persistent-disk-0', 'index': 0, 'boot': True, 'autoDelete': True, 'licenses': ['https://www.googleapis.com/compute/v1/projects/debian-cloud/global/licenses/debian-9-stretch'], 'interface': 'SCSI', 'guestOsFeatures': [{'type': 'VIRTIO_SCSI_MULTIQUEUE'}], 'kind': 'compute#attachedDisk'}], 'metadata': {'fingerprint': 'lIND2MNa_ME=', 'kind': 'compute#metadata'}, 'serviceAccounts': [{'email': '1093190347201-compute@developer.gserviceaccount.com', 'scopes': ['https://www.googleapis.com/auth/compute']}], 'selfLink': 'https://www.googleapis.com/compute/v1/projects/bhushan-malgaonkar/zones/us-central1-c/instances/map-reduce-master', 'scheduling': {'onHostMaintenance': 'MIGRATE', 'automaticRestart': True, 'preemptible': False}, 'cpuPlatform': 'Intel Haswell', 'labelFingerprint': '42WmSpB8rSM=', 'startRestricted': False, 'deletionProtection': False, 'kind': 'compute#instance'}
+INFO: Initializing KeyValueStoreClient
+INFO: Initializing KeyValueStoreClient is successful
+INFO: Initializing MapReduceClient, KV_STORE_HOST: 35.224.65.153, MAP_REDUCE_MASTER_HOST: 35.193.251.179
+INFO: New job submitted: dir_data=apps/invertedindex/data, dir_code=apps/invertedindex/code, dir_output=apps/invertedindex/result
+INFO: reading data from        : apps/invertedindex/data
+INFO: reading code from        : apps/invertedindex/code
+INFO: output will be saved at  : apps/invertedindex/result
+INFO: Uploading directory apps/invertedindex/data
+INFO: Uploading directory apps/invertedindex/data is successful. dir_id: be9707c2-d06f-42c2-beaf-c0430f9ff43d-191205-160137
+INFO: Uploading directory apps/invertedindex/code
+INFO: Uploading directory apps/invertedindex/code is successful. dir_id: 7a548bb1-926a-415c-9c6c-6ee7fa7145ea-191205-160143
+INFO: data is saved with data_id: be9707c2-d06f-42c2-beaf-c0430f9ff43d-191205-160137
+INFO: code is saved with code_id: 7a548bb1-926a-415c-9c6c-6ee7fa7145ea-191205-160143
+DEBUG: master: Received job
+DEBUG: master: Setting up workers
+DEBUG: master: Setting up workers is complete
+DEBUG: master: map_task 1/11 --> ('34.66.17.0', 5000)
+DEBUG: master: map_task 2/11 --> ('34.69.241.214', 5000)
+DEBUG: master: map_task 3/11 --> ('34.69.241.214', 5000)
+DEBUG: master: map_task 4/11 --> ('34.66.17.0', 5000)
+DEBUG: master: map_task 5/11 --> ('34.69.241.214', 5000)
+DEBUG: master: map_task 6/11 --> ('34.66.17.0', 5000)
+DEBUG: master: map_task 7/11 --> ('34.66.17.0', 5000)
+DEBUG: master: map_task 8/11 --> ('34.69.241.214', 5000)
+DEBUG: master: map_task 9/11 --> ('34.66.17.0', 5000)
+DEBUG: master: map_task 10/11 --> ('34.69.241.214', 5000)
+DEBUG: master: map_task 11/11 --> ('34.66.17.0', 5000)
+DEBUG: master: All map_tasks finished
+DEBUG: master: Shuffling and sorting of mapper outputs is complete.
+DEBUG: master: reduce_task --> ('34.69.241.214', 5000)
+DEBUG: master: reduce_task finished.
+DEBUG: master: Success
+DEBUG: master: Cleaning up workers
+DEBUG: master: Cleaning up workers is complete
+INFO: map-reduce task is finished. downloading output
+INFO: output is written to apps/invertedindex/result
+INFO: Initializing MapReduceClient
+INFO: Listing instances
+INFO: URL being requested: GET https://compute.googleapis.com/compute/v1/projects/bhushan-malgaonkar/zones/us-central1-c/instances?alt=json
+DEBUG: Making request: POST https://oauth2.googleapis.com/token
+INFO: {'id': '7575694310818236860', 'creationTimestamp': '2019-12-05T13:32:03.875-08:00', 'name': 'map-reduce-master', 'tags': {'fingerprint': '42WmSpB8rSM='}, 'machineType': 'https://www.googleapis.com/compute/v1/projects/bhushan-malgaonkar/zones/us-central1-c/machineTypes/n1-standard-1', 'status': 'RUNNING', 'zone': 'https://www.googleapis.com/compute/v1/projects/bhushan-malgaonkar/zones/us-central1-c', 'canIpForward': False, 'networkInterfaces': [{'network': 'https://www.googleapis.com/compute/v1/projects/bhushan-malgaonkar/global/networks/default', 'subnetwork': 'https://www.googleapis.com/compute/v1/projects/bhushan-malgaonkar/regions/us-central1/subnetworks/default', 'networkIP': '10.128.15.208', 'name': 'nic0', 'accessConfigs': [{'type': 'ONE_TO_ONE_NAT', 'name': 'external-nat', 'natIP': '34.69.241.214', 'networkTier': 'PREMIUM', 'kind': 'compute#accessConfig'}], 'fingerprint': 'Bjj6Xlqgl3Y=', 'kind': 'compute#networkInterface'}], 'disks': [{'type': 'PERSISTENT', 'mode': 'READ_WRITE', 'source': 'https://www.googleapis.com/compute/v1/projects/bhushan-malgaonkar/zones/us-central1-c/disks/map-reduce-master', 'deviceName': 'persistent-disk-0', 'index': 0, 'boot': True, 'autoDelete': True, 'licenses': ['https://www.googleapis.com/compute/v1/projects/debian-cloud/global/licenses/debian-9-stretch'], 'interface': 'SCSI', 'guestOsFeatures': [{'type': 'VIRTIO_SCSI_MULTIQUEUE'}], 'kind': 'compute#attachedDisk'}], 'metadata': {'fingerprint': 'lIND2MNa_ME=', 'kind': 'compute#metadata'}, 'serviceAccounts': [{'email': '1093190347201-compute@developer.gserviceaccount.com', 'scopes': ['https://www.googleapis.com/auth/compute']}], 'selfLink': 'https://www.googleapis.com/compute/v1/projects/bhushan-malgaonkar/zones/us-central1-c/instances/map-reduce-master', 'scheduling': {'onHostMaintenance': 'MIGRATE', 'automaticRestart': True, 'preemptible': False}, 'cpuPlatform': 'Intel Haswell', 'labelFingerprint': '42WmSpB8rSM=', 'startRestricted': False, 'deletionProtection': False, 'kind': 'compute#instance'}
+INFO: Listing instances
+INFO: URL being requested: GET https://compute.googleapis.com/compute/v1/projects/bhushan-malgaonkar/zones/us-central1-c/instances?alt=json
+INFO: {'id': '7575694310818236860', 'creationTimestamp': '2019-12-05T13:32:03.875-08:00', 'name': 'map-reduce-master', 'tags': {'fingerprint': '42WmSpB8rSM='}, 'machineType': 'https://www.googleapis.com/compute/v1/projects/bhushan-malgaonkar/zones/us-central1-c/machineTypes/n1-standard-1', 'status': 'RUNNING', 'zone': 'https://www.googleapis.com/compute/v1/projects/bhushan-malgaonkar/zones/us-central1-c', 'canIpForward': False, 'networkInterfaces': [{'network': 'https://www.googleapis.com/compute/v1/projects/bhushan-malgaonkar/global/networks/default', 'subnetwork': 'https://www.googleapis.com/compute/v1/projects/bhushan-malgaonkar/regions/us-central1/subnetworks/default', 'networkIP': '10.128.15.208', 'name': 'nic0', 'accessConfigs': [{'type': 'ONE_TO_ONE_NAT', 'name': 'external-nat', 'natIP': '34.69.241.214', 'networkTier': 'PREMIUM', 'kind': 'compute#accessConfig'}], 'fingerprint': 'Bjj6Xlqgl3Y=', 'kind': 'compute#networkInterface'}], 'disks': [{'type': 'PERSISTENT', 'mode': 'READ_WRITE', 'source': 'https://www.googleapis.com/compute/v1/projects/bhushan-malgaonkar/zones/us-central1-c/disks/map-reduce-master', 'deviceName': 'persistent-disk-0', 'index': 0, 'boot': True, 'autoDelete': True, 'licenses': ['https://www.googleapis.com/compute/v1/projects/debian-cloud/global/licenses/debian-9-stretch'], 'interface': 'SCSI', 'guestOsFeatures': [{'type': 'VIRTIO_SCSI_MULTIQUEUE'}], 'kind': 'compute#attachedDisk'}], 'metadata': {'fingerprint': 'lIND2MNa_ME=', 'kind': 'compute#metadata'}, 'serviceAccounts': [{'email': '1093190347201-compute@developer.gserviceaccount.com', 'scopes': ['https://www.googleapis.com/auth/compute']}], 'selfLink': 'https://www.googleapis.com/compute/v1/projects/bhushan-malgaonkar/zones/us-central1-c/instances/map-reduce-master', 'scheduling': {'onHostMaintenance': 'MIGRATE', 'automaticRestart': True, 'preemptible': False}, 'cpuPlatform': 'Intel Haswell', 'labelFingerprint': '42WmSpB8rSM=', 'startRestricted': False, 'deletionProtection': False, 'kind': 'compute#instance'}
+INFO: Initializing KeyValueStoreClient
+INFO: Initializing KeyValueStoreClient is successful
+INFO: Initializing MapReduceClient, KV_STORE_HOST: 34.66.17.0, MAP_REDUCE_MASTER_HOST: 34.69.241.214
+INFO: New job submitted: dir_data=apps/invertedindex/data, dir_code=apps/invertedindex/code, dir_output=apps/invertedindex/result
+INFO: reading data from        : apps/invertedindex/data
+INFO: reading code from        : apps/invertedindex/code
+INFO: output will be saved at  : apps/invertedindex/result
+INFO: Uploading directory apps/invertedindex/data
+INFO: Uploading directory apps/invertedindex/data is successful. dir_id: 0a250679-f3a8-4aa8-82d4-58f6bdb38613-191205-164637
+INFO: Uploading directory apps/invertedindex/code
+INFO: Uploading directory apps/invertedindex/code is successful. dir_id: bb793f4f-4556-4994-80f0-cdf6c5918d68-191205-164643
+INFO: data is saved with data_id: 0a250679-f3a8-4aa8-82d4-58f6bdb38613-191205-164637
+INFO: code is saved with code_id: bb793f4f-4556-4994-80f0-cdf6c5918d68-191205-164643
+DEBUG: master: Received job
+DEBUG: master: Setting up workers
+DEBUG: master: Setting up workers is complete
+DEBUG: master: map_task 1/11 --> ('35.224.65.153', 5000)
+DEBUG: master: map_task 2/11 --> ('35.193.251.179', 5000)
+DEBUG: master: map_task 3/11 --> ('35.193.251.179', 5000)
+DEBUG: master: map_task 4/11 --> ('35.224.65.153', 5000)
+DEBUG: master: map_task 5/11 --> ('35.193.251.179', 5000)
+DEBUG: master: map_task 6/11 --> ('35.224.65.153', 5000)
+DEBUG: master: map_task 7/11 --> ('35.193.251.179', 5000)
+DEBUG: master: map_task 8/11 --> ('35.224.65.153', 5000)
+DEBUG: master: map_task 9/11 --> ('35.193.251.179', 5000)
+DEBUG: master: map_task 10/11 --> ('35.224.65.153', 5000)
+DEBUG: master: map_task 11/11 --> ('35.193.251.179', 5000)
+DEBUG: master: All map_tasks finished
+DEBUG: master: Shuffling and sorting of mapper outputs is complete.
+DEBUG: master: reduce_task --> ('35.224.65.153', 5000)
+DEBUG: master: reduce_task finished.
+DEBUG: master: Success
+DEBUG: master: Cleaning up workers
+DEBUG: master: Cleaning up workers is complete
+INFO: map-reduce task is finished. downloading output
+INFO: output is written to apps/invertedindex/result

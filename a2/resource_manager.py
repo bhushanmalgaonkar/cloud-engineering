@@ -85,7 +85,3 @@ class ResourceManager:
 
         log.info('WORKERS = {}'.format(WORKERS))
 
-if __name__ == "__main__":
-    rm = ResourceManager()
-    # print(rm.create_workers(5))
-    rm.destroy_workers()
