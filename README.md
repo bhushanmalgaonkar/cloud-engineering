@@ -91,6 +91,7 @@ Provides methods to store/retrieve files/directories in key-value store. It read
 
 Since KeyValueStore is minimal and doesn't provide any notion of files and directories, the KeyValueStoreClient maps an hierarchy of keys to unique id of the chunk. It saves the mapping in the database for efficient lookup. See **chunks** table below.
 
+## GCP
 ### gcloud_util
 Provides elementary funcationality to manipulate GCP compute resources such as create/delete/list worker instances, finding IP given instance name.
 
