@@ -21,12 +21,12 @@ class ResourceManager:
             instance_name = 'worker-{}'.format(idx)
             operation = create_worker_instance(instance_name, disk_name=instance_name, wait=False)
             create_operations.append(operation)
-            print('created worker-{}'.format(idx))
+            log.info('created worker-{}'.format(idx))
 
         # wait until all instances are running
         for idx, operation in enumerate(create_operations):
             wait_for_operation(operation)
-            print('worker-{} is running'.format(idx))
+            log.info('worker-{} is running'.format(idx))
 
         # wait until all instances are ssh ready
         WORKERS = []
@@ -35,10 +35,10 @@ class ResourceManager:
             ip = get_instance_ip(instance_name)
             wait_port_open(ip, 22)
             WORKERS.append((ip, MAP_REDUCE_WORKER_PORT))
-            print('worker-{} is ssh ready'.format(idx))
+            log.info('worker-{} is ssh ready'.format(idx))
         
-        log.info("Waiting 5 sec for startup-script to complete")
-        time.sleep(5)
+        log.info("Waiting 15 sec for startup-script to complete")
+        time.sleep(15)
 
         return WORKERS
 
@@ -55,7 +55,7 @@ class ResourceManager:
             wait_for_operation(operation)
 
     def find_kvstore(self):
-        print('Finding kvstore')
+        log.info('Finding kvstore')
         instances = list_instances()
         if 'key-value-store' not in instances:
             raise Exception('key-value-store instance does not exist')
@@ -83,7 +83,7 @@ class ResourceManager:
             if info['type'] == 'map-reduce-worker' and info['status'] == 'RUNNING':
                 WORKERS.append((info['ip'], MAP_REDUCE_WORKER_PORT))
 
-        print('WORKERS = {}'.format(WORKERS))
+        log.info('WORKERS = {}'.format(WORKERS))
 
 if __name__ == "__main__":
     rm = ResourceManager()
