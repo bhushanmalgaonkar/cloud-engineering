@@ -127,3 +127,6 @@ sqlalchemy uses connection pooling to allow concurrent access. However in case o
 
 2. **Manually starting worker processes instead of letting Master spawn them**
     1. Although the assignment says master should spawn all the mapper and reducer tasks, in reality these tasks will be run on different nodes where master will have no control over spawning new processes. Unless, we keep an agent on these nodes and register these nodes with master, then master can request nodes to spawn processes as required. Such an agent is implement in 'mapreduce_worker.py'
+    
+3. **Client should not have control over number of workers**
+    1. Number of workers to be launched should be decided by master instead of client. Although not done in this assignment master can be made intelligent to detect load and launch more instances as required.
