@@ -1,5 +1,11 @@
 ## How to run
-#### 1. Setup private key
+#### 1. Create a project using Google cloud console
+  - Update following variables in gcloud_util.py
+    - GCLOUD_PROJECT
+    - GCLOUD_REGION
+    - GCLOUD_ZONE
+    
+#### 2. Setup private key
   - Go to API & Service, Credentials, Create credentials, Service account key
   - Create a new service account with Compute Admin privileges
   - Select JSON key before creating the account. This will download the key to your machine
@@ -7,7 +13,7 @@
     - temporary: ```export GOOGLE_APPLICATION_CREDENTIALS=/path/to/key```, or
     - permenant: ```echo 'export GOOGLE_APPLICATION_CREDENTIALS=/path/to/key' >> ~/.profile && source ~/.profile```)
     
-#### 2. Open ports in firewall
+#### 3. Open ports in firewall
   - Go to VPC Network, Firewall rules and create following rules
   
 | Name               | Priority | Direction of traffic | Action on match | Targets                      | Source filter | Source IP ranges | Protocol and ports |
