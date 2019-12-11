@@ -1,11 +1,43 @@
-## How to run locally
-1. Open constants.py. Modify ports, add/remove workers. Save.
-2. run ```./driver.py```. This is a utility that will parse constants.py and spwan kvstore, master and all the workers on current machine.
+## How to run
+#### 1. Setup private key
+  - Go to API & Service, Credentials, Create credentials, Service account key
+  - Create a new service account with Compute Admin privileges
+  - Select JSON key before creating the account. This will download the key to your machine
+  - Create new environment variable GOOGLE_APPLICATION_CREDENTIALS to point to this key, e.g. in Linux
+    - temporary: ```export GOOGLE_APPLICATION_CREDENTIALS=/path/to/key```, or
+    - permenant: ```echo 'export GOOGLE_APPLICATION_CREDENTIALS=/path/to/key' >> ~/.profile && source ~/.profile```)
+    
+#### 2. Open ports in firewall
+  - Go to VPC Network, Firewall rules and create following rules
+  
+| Name               | Priority | Direction of traffic | Action on match | Targets                      | Source filter | Source IP ranges | Protocol and ports |
+|--------------------|----------|----------------------|-----------------|------------------------------|---------------|------------------|--------------------|
+| allow-kvstore-7894 | 65534    | Ingress              | Allow           | All instances in the network | IP ranges     | 0.0.0.0/0        | tcp: 7894          |
+| allow-master-9898  | 65534    | Ingress              | Allow           | All instances in the network | IP ranges     | 0.0.0.0/0        | tcp: 9898          |
+| allow-mysql-3306   | 65534    | Ingress              | Allow           | All instances in the network | IP ranges     | 0.0.0.0/0        | tcp: 3306          |
+| allow-worker-5000  | 65534    | Ingress              | Allow           | All instances in the network | IP ranges     | 0.0.0.0/0        | tcp: 5000          |
+  
+#### 3. Deploy
+  - ```scripts/command.sh deploy```
 
-## How to run in distributed setup
-1. Start worker processes on worker nodes. Update WORKERS in constants.py at master to point to these nodes ```./mapreduce_worker.py -p <port>```
-2. Start key-value store. Update KV_STORE_* values in constants.py at master ```./kvstore_server.py```
-3. Start MapReduceMaster ```./mapreduce_master.py```
+#### 4. Run map-reduce task
+  - ```python3 a2/mapreduce_client.py -d a2/apps/invertedindex/data -c a2/invertedindex/code -o a2/invertedindex/result```
+
+## Time taken by different operations
+#### 1. Deploy: 7m48.408s
+#### 2. Delete (cleaning up): 2m48.234s
+#### 3. Create workers
+  - 1 workers, 1m41s
+  - 2 workers, 1m39s
+  - 3 workers, 1m43s
+  - 4 workers, 1m42s
+#### 4. Inverted-index
+  - 2 workers, 1 tasks/worker: 3m36.292s
+  - 2 workers, 2 tasks/worker: 3m31.292s
+  - 4 workers, 1 tasks/worker: 3m31.604s
+  - 4 workers, 2 tasks/worker: 3m28.292s
+  - 6 workers, 1 tasks/worker: 3m25.342s
+  - 6 workers, 2 tasks/worker: 3m21.342s
 
 ## Submiting a job
 mapreduce_cilent.py provides command line api to submit a job to MapReduceMaster. Provide following arguments
@@ -58,6 +90,12 @@ The values are stored on local disk with key as filename and value as data. File
 Provides methods to store/retrieve files/directories in key-value store. It reads and divides the files into chunks of fixed size (constants.BLOCK_SIZE), assigns each chunk an unique id and saves it the KeyValueStore. 
 
 Since KeyValueStore is minimal and doesn't provide any notion of files and directories, the KeyValueStoreClient maps an hierarchy of keys to unique id of the chunk. It saves the mapping in the database for efficient lookup. See **chunks** table below.
+
+### gcloud_util
+Provides elementary funcationality to manipulate GCP compute resources such as create/delete/list worker instances, finding IP given instance name.
+
+### ResourceManager
+Provides higher level functionality to operate with GCP compute resources such as create/delete multiple instances, finding IP address of KeyValueStore and MapReduceMaster servers
 
 ## Database
 1. **chunks**: stores location of a specific chunk of a file on the server
