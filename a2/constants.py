@@ -15,3 +15,7 @@ INTERMEDIATE_OUTPUTS_DIR = 'intermediate_outputs'
 WORKERS = []
 NUM_WORKERS = 4
 TASKS_PER_WORKER = 2
+
+GCLOUD_PROJECT = 'bhushan-malgaonkar'
+GCLOUD_REGION = 'us-central1'
+GCLOUD_ZONE = 'us-central1-c'

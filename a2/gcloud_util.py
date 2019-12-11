@@ -8,10 +8,7 @@ from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
 from constants import MAP_REDUCE_WORKER_PORT, USER
-
-GCLOUD_PROJECT = 'bhushan-malgaonkar'
-GCLOUD_REGION = 'us-central1'
-GCLOUD_ZONE = 'us-central1-c'
+from constants import GCLOUD_PROJECT, GCLOUD_REGION, GCLOUD_ZONE
 
 WORKER_DISK_NAME = 'base-snapshot'
 
@@ -38,11 +35,17 @@ def create_worker_boot_disk(disk_name, wait=False):
 def delete_disk(disk_name, wait=False):
     log.info("Deleting disk {}".format(disk_name))
 
-    response = compute.disks().delete(project=GCLOUD_PROJECT, zone=GCLOUD_ZONE, disk=disk_name).execute()
-    if wait:
-        response = wait_for_operation(response)
+    try:
+        response = compute.disks().delete(project=GCLOUD_PROJECT, zone=GCLOUD_ZONE, disk=disk_name).execute()
+        if wait:
+            response = wait_for_operation(response)
+        
+        log.info("Deleting disk {} is successful".format(disk_name))
+    except HttpError as e:
+        log.warn("Disk {} was not found".format(disk_name))
+        if e.args[0]['status'] != '404':
+            raise e
 
-    log.info("Deleting disk {} is successful".format(disk_name))
     return response
 
 def create_worker_instance(instance_name, disk_name=None, wait=False):

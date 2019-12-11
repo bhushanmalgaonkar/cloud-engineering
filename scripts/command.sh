@@ -22,6 +22,8 @@ if [[ $1 == 'deploy' ]]; then
         fi
         sleep 1
     done
+
+    sleep 15
     
     echo -e "\n\n***Transferring code to VM"
     gcloud compute scp --recurse ../a2/ $user@$map_reduce_master: --zone $zone
